@@ -20,3 +20,19 @@ Sphere::Sphere(const Math::Point3D& origin, double radius)
     this->_radius = radius;
 }
 
+bool Sphere::hit(const Ray& ray) const
+{
+    Math::Vector3D originToSphere(
+        ray.getOrigin().getX() - _origin.getX(),
+        ray.getOrigin().getY() - _origin.getY(),
+        ray.getOrigin().getZ() - _origin.getZ()
+    );
+
+    double a = Math::Vector3D::dot(ray.getDirection(), ray.getDirection());
+    double b = 2.0 * Math::Vector3D::dot(ray.getDirection(), originToSphere);
+    double c = Math::Vector3D::dot(originToSphere, originToSphere) - _radius * _radius;
+
+    double discriminant = (b * b) - 4 * a * c;
+
+    return discriminant >= 0;
+}

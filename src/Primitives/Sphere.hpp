@@ -19,6 +19,7 @@ namespace RayTracer {
         Sphere(const Math::Point3D& origin, double radius);
         ~Sphere() = default;
 
+        bool hit(const Ray& ray) const;
     private:
         Math::Point3D _origin;
         double _radius;
