@@ -15,12 +15,12 @@ Ray::Ray(const Point3D& origin, const Vector3D& direction)
     this->_direction = direction;
 }
 
-Point3D Ray::getOrigin()
+Point3D Ray::getOrigin() const
 {
     return this->_origin;
 }
 
-Vector3D Ray::getDirection()
+Vector3D Ray::getDirection() const
 {
     return this->_direction;
 }
