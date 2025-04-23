@@ -10,7 +10,7 @@
 
 #include "src/Math/Point3D.hpp"
 #include "src/Math/Vector3D.hpp"
-#include "src/Ray.hpp"
+#include "src/RayTracer/Ray.hpp"
 
 namespace RayTracer {
     class Sphere {
