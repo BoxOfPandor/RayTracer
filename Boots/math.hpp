@@ -21,6 +21,11 @@ namespace Math {
             double length();
             double dot(Vector3D vec1, Vector3D vec2);
 
+            void translate(Math::Vector3D vec);
+            void rotateX(double degree);
+            void rotateY(double degree);
+            void rotateZ(double degree);
+
             Vector3D operator+(Vector3D other);
             void operator+=(Vector3D other);
             Vector3D operator-(Vector3D other);

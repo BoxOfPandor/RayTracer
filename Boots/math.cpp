@@ -51,6 +51,43 @@ double Math::Vector3D::dot(Vector3D vec1, Vector3D vec2)
     return vec1.getX() * vec2.getX() + vec1.getY() * vec2.getY() + vec1.getZ() * vec2.getZ();
 }
 
+void Math::Vector3D::translate(Math::Vector3D vec)
+{
+    this->_x += vec.getX();
+    this->_y += vec.getY();
+    this->_z += vec.getZ();
+}
+
+void Math::Vector3D::rotateX(double degree)
+{
+    double radian = degree * M_PI / 180.0;
+    double cos = std::cos(radian);
+    double sin = std::sin(radian);
+
+    this->_y = this->_y * cos + this->_z * (-sin);
+    this->_z = this->_y * sin + this->_z * cos;
+}
+
+void Math::Vector3D::rotateY(double degree)
+{
+    double radian = degree * M_PI / 180.0;
+    double cos = std::cos(radian);
+    double sin = std::sin(radian);
+
+    this->_x = this->_x * cos + this->_z * sin;
+    this->_z = this->_x * (-sin) + this->_z * cos;
+}
+
+void Math::Vector3D::rotateZ(double degree)
+{
+    double radian = degree * M_PI / 180.0;
+    double cos = std::cos(radian);
+    double sin = std::sin(radian);
+
+    this->_x = this->_x * cos + this->_y * (-sin);
+    this->_y = this->_x * sin + this->_y * cos;
+}
+
 /*****************************************************************************/
 // Vector operator with Vector
 Math::Vector3D Math::Vector3D::operator+(Math::Vector3D other)
