@@ -11,7 +11,7 @@
 using namespace RayTracer;
 using namespace Math;
 
-Sphere::Sphere(const Math::Point3D& origin, double radius, const Material& material)
+Sphere::Sphere(const Math::Point3D& origin, double radius, const IMaterial& material)
     : _origin(origin), _radius(radius), _material(material)
 {
 }
@@ -89,7 +89,7 @@ void Sphere::rotateZ(double angle)
 {
 }
 
-const Material& Sphere::getMaterial() const
+const IMaterial& Sphere::getMaterial() const
 {
     return _material;
 }

@@ -38,3 +38,5 @@
 CMakeLists.txt
 cmake-build-debug
 build
+*.ppm
+raytracer
