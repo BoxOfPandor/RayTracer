@@ -8,8 +8,8 @@
 #ifndef IMATERIAL_HPP
 #define IMATERIAL_HPP
 
-#include "../Math/Vector3D.hpp"
-#include "../Math/Point3D.hpp"
+#include "Vector3D.hpp"
+#include "Point3D.hpp"
 
 namespace RayTracer {
 
