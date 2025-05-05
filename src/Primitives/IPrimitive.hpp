@@ -13,7 +13,7 @@
 #include "Ray.hpp"
 
 namespace RayTracer {
-    class Material;
+    class IMaterial;
 
     class IPrimitive {
     public:
@@ -69,7 +69,7 @@ namespace RayTracer {
          * @brief Get the material of the primitive
          * @return The material of the primitive
          */
-        virtual const Material& getMaterial() const = 0;
+        virtual const IMaterial& getMaterial() const = 0;
     };
 } // namespace RayTracer
 
