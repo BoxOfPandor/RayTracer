@@ -19,7 +19,7 @@ namespace RayTracer {
     
     class Sphere : public IPrimitive {
     public:
-        Sphere(const Math::Point3D& origin, double radius, const Material& material);
+        Sphere(const Math::Point3D& origin, double radius, const IMaterial& material);
         ~Sphere() = default;
 
         bool hits(const Ray& ray) const override;
@@ -29,12 +29,12 @@ namespace RayTracer {
         void rotateX(double angle) override;
         void rotateY(double angle) override;
         void rotateZ(double angle) override;
-        const Material& getMaterial() const override;
+        const IMaterial& getMaterial() const override;
 
     private:
         Math::Point3D _origin;
         double _radius;
-        const Material& _material;
+        const IMaterial& _material;
     };
 } // namespace RayTracer
 
