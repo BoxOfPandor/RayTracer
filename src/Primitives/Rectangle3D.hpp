@@ -8,8 +8,8 @@
 #ifndef RECTANGLE3D_HPP
 #define RECTANGLE3D_HPP
 
-#include "src/Math/Point3D.hpp"
-#include "src/Math/Vector3D.hpp"
+#include "Point3D.hpp"
+#include "Vector3D.hpp"
 
 namespace RayTracer {
     class Rectangle3D {
