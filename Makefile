@@ -9,6 +9,20 @@ NAME = raytracer
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic
 
+# Detect OS
+UNAME_S := $(shell uname -s)
+
+# SFML flags
+ifeq ($(UNAME_S),Darwin)
+    # macOS specific SFML flags
+    SFML_LIBS = -L/opt/homebrew/opt/sfml@2/lib -lsfml-graphics -lsfml-window -lsfml-system
+    SFML_INCLUDES = -I/opt/homebrew/opt/sfml@2/include
+else
+    # Linux SFML flags
+    SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system
+    SFML_INCLUDES =
+endif
+
 SRC_DIR = src
 OBJ_DIR = obj
 INCLUDE_DIRS = -I$(SRC_DIR) \
@@ -18,7 +32,9 @@ INCLUDE_DIRS = -I$(SRC_DIR) \
                -I$(SRC_DIR)/Materials \
                -I$(SRC_DIR)/Lights \
                -I$(SRC_DIR)/Renders \
-               -I$(SRC_DIR)/SceneLoaders
+               -I$(SRC_DIR)/SceneLoaders \
+               $(SFML_INCLUDES)
+
 SRCS := $(shell find $(SRC_DIR) -name "*.cpp")
 OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 OBJ_DIRS := $(sort $(dir $(OBJS)))
@@ -39,7 +55,7 @@ dirs:
 
 $(NAME): $(OBJS)
 	@echo "$(GREEN)Linking $(NAME)...$(RESET)"
-	@$(CXX) $(CXXFLAGS) -o $@ $^
+	@$(CXX) $(CXXFLAGS) -o $@ $^ $(SFML_LIBS)
 	@echo "$(GREEN)$(NAME) successfully compiled!$(RESET)"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
