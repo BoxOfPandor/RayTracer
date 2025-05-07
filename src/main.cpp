@@ -67,7 +67,7 @@ int main(int argc, char* argv[])
         Camera camera(cameraOrigin, screen);
 
         // Create a scene
-        Scene scene(camera, 800, 600);
+        Scene scene(camera, 1920, 1080);
 
         // Create materials
         auto redMaterial = std::make_shared<FlatMaterial>(Vector3D(1.0, 0.2, 0.2));
@@ -80,7 +80,7 @@ int main(int argc, char* argv[])
         auto sphere2 = std::make_unique<Sphere>(Point3D(2, 0, -7), 1.0, *blueMaterial);
         auto sphere3 = std::make_unique<Sphere>(Point3D(-2, 0, -7), 1.0, *greenMaterial);
         auto sphere4 = std::make_unique<Sphere>(Point3D(0, -2, -5), 1.0, *yellowMaterial);
-        
+
         scene.addPrimitive(std::move(sphere1));
         scene.addPrimitive(std::move(sphere2));
         scene.addPrimitive(std::move(sphere3));
@@ -92,13 +92,13 @@ int main(int argc, char* argv[])
             Vector3D(1, 1, 1),    // White light
             0.7                   // Intensity
         );
-        
+
         auto light2 = std::make_unique<DirectionalLight>(
             Vector3D(1, -0.5, -0.5), // Direction
             Vector3D(0.5, 0.5, 0.8), // Blueish light
             0.3                      // Lower intensity
         );
-        
+
         scene.addLight(std::move(light1));
         scene.addLight(std::move(light2));
 
