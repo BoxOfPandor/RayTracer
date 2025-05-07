@@ -15,10 +15,18 @@ Camera::Camera()
     this->_screen = Rectangle3D(Point3D(-1, -1, -1), Vector3D(2, 0, 0), Vector3D(0, 2, 0));
 }
 
-Camera::Camera(const Point3D& origin, const Rectangle3D& screen)
+Camera::Camera(const Math::Point3D& origin, double screenDistance, int imageWidth, int imageHeight)
+    : _origin(origin)
 {
-    this->_origin = origin;
-    this->_screen = screen;
+    double aspectRatio = static_cast<double>(imageWidth) / imageHeight;
+    double width = 2.0;
+    double height = width / aspectRatio;
+
+    _screen = Rectangle3D(
+        Point3D(-width/2, -height/2, -screenDistance),
+        Vector3D(width, 0, 0),
+        Vector3D(0, height, 0)
+    );
 }
 
 Camera::Camera(const Camera& other)
@@ -67,4 +75,18 @@ void Camera::setOrigin(const Point3D& origin)
 void Camera::setScreen(const Rectangle3D& screen)
 {
     this->_screen = screen;
+}
+
+void Camera::updateScreenForDimensions(int width, int height)
+{
+    double aspectRatio = static_cast<double>(width) / height;
+    double screenWidth = 2.0;
+    double screenHeight = screenWidth / aspectRatio;
+    double screenDistance = _screen.getOrigin().getZ();
+
+    _screen = Rectangle3D(
+        Point3D(-screenWidth/2, -screenHeight/2, screenDistance),
+        Vector3D(screenWidth, 0, 0),
+        Vector3D(0, screenHeight, 0)
+    );
 }

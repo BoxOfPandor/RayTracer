@@ -61,10 +61,15 @@ int main(int argc, char* argv[])
             }
         }
 
-        // Create a camera
+        // Calculate the aspect ratio
+        double aspectRatio = static_cast<double>(1920) / 1080;
+        double width = 2.0;
+        double height = width / aspectRatio;
+
+        // Create screen with correct aspect ratio
+        Rectangle3D screen(Point3D(-width/2, -height/2, -2), Vector3D(width, 0, 0), Vector3D(0, height, 0));
         Point3D cameraOrigin(0, 0, 0);
-        Rectangle3D screen(Point3D(-1, -1, -2), Vector3D(2, 0, 0), Vector3D(0, 2, 0));
-        Camera camera(cameraOrigin, screen);
+        Camera camera(cameraOrigin, 2.0, 1920, 1080);
 
         // Create a scene
         Scene scene(camera, 1920, 1080);
