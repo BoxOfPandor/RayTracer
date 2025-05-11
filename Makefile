@@ -8,6 +8,7 @@
 NAME = raytracer
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic
+LDFLAGS = -lconfig++
 
 SRC_DIR = src
 OBJ_DIR = obj
@@ -39,7 +40,7 @@ dirs:
 
 $(NAME): $(OBJS)
 	@echo "$(GREEN)Linking $(NAME)...$(RESET)"
-	@$(CXX) $(CXXFLAGS) -o $@ $^
+	@$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
 	@echo "$(GREEN)$(NAME) successfully compiled!$(RESET)"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
