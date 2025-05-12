@@ -32,57 +32,6 @@ void printUsage(const char* programName)
     std::cout << "If scene_file is provided, loads the scene from that file" << std::endl;
 }
 
-std::unique_ptr<Scene> createDefaultScene()
-{
-    // Calculate the aspect ratio
-    double aspectRatio = static_cast<double>(1920) / 1080;
-    double width = 2.0;
-    double height = width / aspectRatio;
-
-    // Create screen with correct aspect ratio
-    Rectangle3D screen(Point3D(-width/2, -height/2, -2), Vector3D(width, 0, 0), Vector3D(0, height, 0));
-    Point3D cameraOrigin(0, 0, 0);
-    Camera camera(cameraOrigin, 2.0, 1920, 1080);
-
-    // Create a scene
-    auto scene = std::make_unique<Scene>(camera, 1920, 1080);
-
-    // Create materials
-    auto redMaterial = std::make_shared<FlatMaterial>(Vector3D(1.0, 0.2, 0.2));
-    auto blueMaterial = std::make_shared<FlatMaterial>(Vector3D(0.2, 0.2, 1.0));
-    auto greenMaterial = std::make_shared<FlatMaterial>(Vector3D(0.2, 1.0, 0.2));
-    auto yellowMaterial = std::make_shared<FlatMaterial>(Vector3D(1.0, 1.0, 0.2));
-
-    // Add primitives to the scene
-    auto sphere1 = std::make_unique<Sphere>(Point3D(0, 0, -5), 1.0, *redMaterial);
-    auto sphere2 = std::make_unique<Sphere>(Point3D(2, 0, -7), 1.0, *blueMaterial);
-    auto sphere3 = std::make_unique<Sphere>(Point3D(-2, 0, -7), 1.0, *greenMaterial);
-    auto sphere4 = std::make_unique<Sphere>(Point3D(0, -2, -5), 1.0, *yellowMaterial);
-
-    scene->addPrimitive(std::move(sphere1));
-    scene->addPrimitive(std::move(sphere2));
-    scene->addPrimitive(std::move(sphere3));
-    scene->addPrimitive(std::move(sphere4));
-
-    // Add lights to the scene
-    auto light1 = std::make_unique<DirectionalLight>(
-        Vector3D(-1, -1, -1), // Direction
-        Vector3D(1, 1, 1),    // White light
-        0.7                   // Intensity
-    );
-
-    auto light2 = std::make_unique<DirectionalLight>(
-        Vector3D(1, -0.5, -0.5), // Direction
-        Vector3D(0.5, 0.5, 0.8), // Blueish light
-        0.3                      // Lower intensity
-    );
-
-    scene->addLight(std::move(light1));
-    scene->addLight(std::move(light2));
-
-    return scene;
-}
-
 int main(int argc, char* argv[])
 {
     try {
