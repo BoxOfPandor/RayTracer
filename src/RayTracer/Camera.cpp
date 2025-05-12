@@ -29,6 +29,11 @@ Camera::Camera(const Math::Point3D& origin, double screenDistance, int imageWidt
     );
 }
 
+Camera::Camera(const Math::Point3D& origin, const Rectangle3D& screen)
+    : _origin(origin), _screen(screen)
+{
+}
+
 Camera::Camera(const Camera& other)
 {
     this->_origin = other._origin;
