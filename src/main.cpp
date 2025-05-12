@@ -29,7 +29,7 @@ void printUsage(const char* programName)
     std::cout << "  --sfml <output.png>    Render with SFML (real-time display + PNG output)" << std::endl;
     std::cout << "  --threads <num>        Number of rendering threads (SFML only, default: auto)" << std::endl;
     std::cout << "  --help                 Display this help message" << std::endl;
-    std::cout << "If scene_file is provided, loads the scene from that file instead of using the default scene" << std::endl;
+    std::cout << "If scene_file is provided, loads the scene from that file" << std::endl;
 }
 
 std::unique_ptr<Scene> createDefaultScene()
@@ -105,13 +105,13 @@ int main(int argc, char* argv[])
             else if (strcmp(argv[i], "--threads") == 0 && i + 1 < argc) {
                 numThreads = std::stoi(argv[++i]);
             }
-            else if (strcmp(argv[i], "--config") == 0 && i + 1 < argc) {
-                sceneFile = argv[++i];
-                useSceneFile = true;
-            }
             else if (strcmp(argv[i], "--help") == 0) {
                 printUsage(argv[0]);
                 return 0;
+            }
+            else if (argv[i][0] != '-') {
+                sceneFile = argv[i];
+                useSceneFile = true;
             }
             else {
                 std::cerr << "Unknown argument: " << argv[i] << std::endl;
