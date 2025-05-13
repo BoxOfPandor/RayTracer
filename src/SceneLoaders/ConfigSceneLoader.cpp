@@ -229,33 +229,62 @@ void ConfigSceneLoader::parseDirectionalLights(const Setting& lights, Scene& sce
     for (int i = 0; i < lights.getLength(); ++i) {
         const Setting& light = lights[i];
 
-        double x = 0, y = 0, z = -1;
+        // Default direction is downward
+        double x = 0, y = -1, z = 0;
+        // Default color is white
         double r = 1.0, g = 1.0, b = 1.0;
         double intensity = 1.0;
 
-        if (light.exists("x")) light.lookupValue("x", x);
-        if (light.exists("y")) light.lookupValue("y", y);
-        if (light.exists("z")) light.lookupValue("z", z);
+        // Parse direction vector
+        if (light.exists("direction")) {
+            const Setting& dir = light["direction"];
+            if (dir.exists("x")) dir.lookupValue("x", x);
+            if (dir.exists("y")) dir.lookupValue("y", y);
+            if (dir.exists("z")) dir.lookupValue("z", z);
+        } else {
+            // If direction is specified as separate x,y,z components
+            if (light.exists("x")) light.lookupValue("x", x);
+            if (light.exists("y")) light.lookupValue("y", y);
+            if (light.exists("z")) light.lookupValue("z", z);
+        }
 
+        // Parse color
         if (light.exists("color")) {
             const Setting& color = light["color"];
             if (color.exists("r")) color.lookupValue("r", r);
             if (color.exists("g")) color.lookupValue("g", g);
             if (color.exists("b")) color.lookupValue("b", b);
 
-            r /= 255.0;
-            g /= 255.0;
-            b /= 255.0;
+            // Check if we need to normalize from [0,255] to [0,1]
+            if (r > 1.0 || g > 1.0 || b > 1.0) {
+                r /= 255.0;
+                g /= 255.0;
+                b /= 255.0;
+            }
         }
 
+        // Parse intensity
         light.lookupValue("intensity", intensity);
 
-        auto dirLight = std::make_unique<DirectionalLight>(
-            Math::Vector3D(x, y, z),
-            Math::Vector3D(r, g, b),
-            intensity
-        );
+        // Create normalized direction vector
+        Math::Vector3D direction(x, y, z);
+        double length = direction.length();
+        if (length > 0) {
+            direction = direction / length;
+        }
 
-        scene.addLight(std::move(dirLight));
+        // Create and add the light
+        try {
+            auto dirLight = std::make_unique<DirectionalLight>(
+                direction,
+                Math::Vector3D(r, g, b),
+                intensity
+            );
+            scene.addLight(std::move(dirLight));
+        } catch (const std::exception& e) {
+            std::cerr << "Error creating directional light: " << e.what() << std::endl;
+            throw;
+        }
     }
 }
+
