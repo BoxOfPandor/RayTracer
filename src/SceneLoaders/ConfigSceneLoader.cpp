@@ -110,13 +110,11 @@ void ConfigSceneLoader::parseCylinders(const Setting& cylinders, Scene& scene,
     for (int i = 0; i < cylinders.getLength(); ++i) {
         const Setting& cylinder = cylinders[i];
 
-        // Parse position (origin)
         double x = 0, y = 0, z = 0;
         cylinder.lookupValue("x", x);
         cylinder.lookupValue("y", y);
         cylinder.lookupValue("z", z);
-        
-        // Parse direction vector
+
         double dirX = 0, dirY = 1, dirZ = 0;
         if (cylinder.exists("direction")) {
             const Setting& direction = cylinder["direction"];
@@ -125,12 +123,10 @@ void ConfigSceneLoader::parseCylinders(const Setting& cylinders, Scene& scene,
             direction.lookupValue("z", dirZ);
         }
         
-        // Parse radius and height
         double radius = 1.0, height = 1.0;
         cylinder.lookupValue("r", radius);
         cylinder.lookupValue("height", height);
 
-        // Parse color
         int red = 255, green = 255, blue = 255;
         if (cylinder.exists("color")) {
             const Setting& color = cylinder["color"];
@@ -138,8 +134,7 @@ void ConfigSceneLoader::parseCylinders(const Setting& cylinders, Scene& scene,
             color.lookupValue("g", green);
             color.lookupValue("b", blue);
         }
-
-        // Create material and cylinder
+        
         auto material = std::make_shared<FlatMaterial>(
             Vector3D(red/255.0, green/255.0, blue/255.0)
         );
@@ -229,41 +224,36 @@ void ConfigSceneLoader::parseDirectionalLights(const Setting& lights, Scene& sce
     for (int i = 0; i < lights.getLength(); ++i) {
         const Setting& light = lights[i];
 
-        // Default direction is downward
         double x = 0, y = -1, z = 0;
-        // Default color is white
         double r = 1.0, g = 1.0, b = 1.0;
         double intensity = 1.0;
 
-        // Parse direction vector
         if (light.exists("direction")) {
             const Setting& dir = light["direction"];
             if (dir.exists("x")) dir.lookupValue("x", x);
             if (dir.exists("y")) dir.lookupValue("y", y);
             if (dir.exists("z")) dir.lookupValue("z", z);
         } else {
-            // If direction is specified as separate x,y,z components
             if (light.exists("x")) light.lookupValue("x", x);
             if (light.exists("y")) light.lookupValue("y", y);
             if (light.exists("z")) light.lookupValue("z", z);
         }
 
-        // Parse color
         if (light.exists("color")) {
             const Setting& color = light["color"];
-            if (color.exists("r")) color.lookupValue("r", r);
-            if (color.exists("g")) color.lookupValue("g", g);
-            if (color.exists("b")) color.lookupValue("b", b);
+            int redInt = 255, greenInt = 255, blueInt = 255;
+            
+            if (color.exists("r")) color.lookupValue("r", redInt);
+            if (color.exists("g")) color.lookupValue("g", greenInt);
+            if (color.exists("b")) color.lookupValue("b", blueInt);
 
-            // Check if we need to normalize from [0,255] to [0,1]
-            if (r > 1.0 || g > 1.0 || b > 1.0) {
-                r /= 255.0;
-                g /= 255.0;
-                b /= 255.0;
-            }
+            r = redInt / 255.0;
+            g = greenInt / 255.0;
+            b = blueInt / 255.0;
+            
+            std::cout << "Light color parsed: R=" << r << ", G=" << g << ", B=" << b << std::endl;
         }
 
-        // Parse intensity
         light.lookupValue("intensity", intensity);
 
         // Create normalized direction vector
@@ -273,7 +263,6 @@ void ConfigSceneLoader::parseDirectionalLights(const Setting& lights, Scene& sce
             direction = direction / length;
         }
 
-        // Create and add the light
         try {
             auto dirLight = std::make_unique<DirectionalLight>(
                 direction,
@@ -287,4 +276,3 @@ void ConfigSceneLoader::parseDirectionalLights(const Setting& lights, Scene& sce
         }
     }
 }
-
