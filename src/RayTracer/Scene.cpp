@@ -59,7 +59,7 @@ bool Scene::findClosestIntersection(const Ray& ray, Intersection& result) const
 
     for (const auto& primitive : _primitives) {
         double t;
-        if (primitive->getIntersection(ray, t) && t < closestT) {
+        if (primitive->getIntersection(ray) && t < closestT) {
             closestT = t;
             result.primitive = primitive.get();
             result.distance = t;
@@ -88,16 +88,16 @@ Vector3D Scene::traceRay(const Ray& ray, int depth) const
     const IMaterial& material = intersection.primitive->getMaterial();
 
     // Calculate lighting
-    Vector3D color = material.getColor(intersection.point) * material.getAmbient();
+    Vector3D color = material.getColor() * material.getAmbient();
 
     for (const auto& light : _lights) {
         if (!light->isShadowed(intersection.point, *this)) {
-            Vector3D lightDir = light->getDirection(intersection.point);
+            Vector3D lightDir = light->getDirection();
             double diffuseIntensity = std::max(0.0, Vector3D::dot(intersection.normal, lightDir * -1));
 
             if (diffuseIntensity > 0) {
                 // Diffuse lighting
-                Vector3D diffuse = material.getColor(intersection.point) * diffuseIntensity * material.getDiffuse();
+                Vector3D diffuse = material.getColor() * diffuseIntensity * material.getDiffuse();
 
                 // Specular lighting
                 Vector3D viewDir = ray.getDirection() * -1;
@@ -105,7 +105,7 @@ Vector3D Scene::traceRay(const Ray& ray, int depth) const
                 double specularIntensity = std::pow(std::max(0.0, Vector3D::dot(intersection.normal, halfwayDir)), material.getShininess());
                 Vector3D specular = light->getColor() * specularIntensity * material.getSpecular();
 
-                color = color + (diffuse + specular) * light->getIntensity(intersection.point) * light->getColor();
+                color = color + (diffuse + specular) * light->getIntensity() * light->getColor();
             }
         }
     }

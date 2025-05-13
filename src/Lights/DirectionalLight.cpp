@@ -25,12 +25,12 @@ DirectionalLight::DirectionalLight(const Vector3D& direction, const Vector3D& co
     }
 }
 
-Vector3D DirectionalLight::getDirection(const Point3D& point) const
+Vector3D DirectionalLight::getDirection() const
 {
     return _direction;
 }
 
-double DirectionalLight::getIntensity(const Point3D& point) const
+double DirectionalLight::getIntensity() const
 {
     return _intensity;
 }

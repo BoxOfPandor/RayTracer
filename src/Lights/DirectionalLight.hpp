@@ -15,8 +15,8 @@ namespace RayTracer {
     public:
         DirectionalLight(const Math::Vector3D& direction, const Math::Vector3D& color, double intensity = 1.0);
 
-        Math::Vector3D getDirection(const Math::Point3D& point) const override;
-        double getIntensity(const Math::Point3D& point) const override;
+        Math::Vector3D getDirection() const override;
+        double getIntensity() const override;
         Math::Vector3D getColor() const override;
         bool isShadowed(const Math::Point3D& point, const Scene& scene) const override;
 
