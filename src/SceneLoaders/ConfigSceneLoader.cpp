@@ -9,6 +9,7 @@
 #include "Scene.hpp"
 #include "Camera.hpp"
 #include "Sphere.hpp"
+#include "Cylinder.hpp"
 #include "FlatMaterial.hpp"
 #include "DirectionalLight.hpp"
 #include <iostream>
@@ -98,7 +99,64 @@ void ConfigSceneLoader::parsePrimitives(const Setting& primitivesSettings, Scene
 
     if (primitivesSettings.exists("planes"))
         parsePlanes(primitivesSettings["planes"], scene, materials);
+        
+    if (primitivesSettings.exists("cylinders"))
+        parseCylinders(primitivesSettings["cylinders"], scene, materials);
 }
+
+void ConfigSceneLoader::parseCylinders(const Setting& cylinders, Scene& scene,
+                                     std::vector<std::shared_ptr<IMaterial>>& materials) const
+{
+    for (int i = 0; i < cylinders.getLength(); ++i) {
+        const Setting& cylinder = cylinders[i];
+
+        // Parse position (origin)
+        double x = 0, y = 0, z = 0;
+        cylinder.lookupValue("x", x);
+        cylinder.lookupValue("y", y);
+        cylinder.lookupValue("z", z);
+        
+        // Parse direction vector
+        double dirX = 0, dirY = 1, dirZ = 0;
+        if (cylinder.exists("direction")) {
+            const Setting& direction = cylinder["direction"];
+            direction.lookupValue("x", dirX);
+            direction.lookupValue("y", dirY);
+            direction.lookupValue("z", dirZ);
+        }
+        
+        // Parse radius and height
+        double radius = 1.0, height = 1.0;
+        cylinder.lookupValue("r", radius);
+        cylinder.lookupValue("height", height);
+
+        // Parse color
+        int red = 255, green = 255, blue = 255;
+        if (cylinder.exists("color")) {
+            const Setting& color = cylinder["color"];
+            color.lookupValue("r", red);
+            color.lookupValue("g", green);
+            color.lookupValue("b", blue);
+        }
+
+        // Create material and cylinder
+        auto material = std::make_shared<FlatMaterial>(
+            Vector3D(red/255.0, green/255.0, blue/255.0)
+        );
+        materials.push_back(material);
+
+        auto cylinderObj = std::make_unique<Cylinder>(
+            Point3D(x, y, z), 
+            Vector3D(dirX, dirY, dirZ),
+            radius, 
+            height, 
+            *material
+        );
+
+        scene.addPrimitive(std::move(cylinderObj));
+    }
+}
+
 
 void ConfigSceneLoader::parseSpheres(const Setting& spheres, Scene& scene,
                                     std::vector<std::shared_ptr<IMaterial>>& materials) const

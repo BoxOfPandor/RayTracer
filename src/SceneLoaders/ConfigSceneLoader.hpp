@@ -42,6 +42,9 @@ namespace RayTracer {
                          std::vector<std::shared_ptr<IMaterial>>& materials) const;
         void parsePlanes(const libconfig::Setting& planes, Scene& scene,
                         std::vector<std::shared_ptr<IMaterial>>& materials) const;
+        void parseCylinders(const libconfig::Setting& cylinders, Scene& scene,
+                           std::vector<std::shared_ptr<IMaterial>>& materials) const;
+
         
         // Helpers for lights
         void parsePointLights(const libconfig::Setting& lights, Scene& scene) const;
