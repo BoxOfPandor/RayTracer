@@ -8,7 +8,7 @@
 NAME = raytracer
 CXX = g++
 CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic
-
+SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system
 SRC_DIR = src
 OBJ_DIR = obj
 INCLUDE_DIRS = -I$(SRC_DIR) \
@@ -18,7 +18,9 @@ INCLUDE_DIRS = -I$(SRC_DIR) \
                -I$(SRC_DIR)/Materials \
                -I$(SRC_DIR)/Lights \
                -I$(SRC_DIR)/Renders \
-               -I$(SRC_DIR)/SceneLoaders
+               -I$(SRC_DIR)/SceneLoaders \
+
+
 SRCS := $(shell find $(SRC_DIR) -name "*.cpp")
 OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 OBJ_DIRS := $(sort $(dir $(OBJS)))
@@ -39,8 +41,8 @@ dirs:
 
 $(NAME): $(OBJS)
 	@echo "$(GREEN)Linking $(NAME)...$(RESET)"
-	@$(CXX) $(CXXFLAGS) -o $@ $^
-	@echo "$(GREEN)$(NAME) successfully compiled!$(RESET)"
+	@$(CXX) $(CXXFLAGS) -o $@ $^ $(SFML_LIBS) -lconfig++
+	@echo "$(GREEN) $(NAME) successfully compiled! $(RESET)"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@echo "$(YELLOW)Compiling $<...$(RESET)"
