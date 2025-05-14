@@ -35,7 +35,7 @@ namespace RayTracer {
          * @param point The point at which to calculate the light direction
          * @return Math::Vector3D The normalized direction vector
          */
-        Math::Vector3D getDirection(const Math::Point3D& point) const override;
+        Math::Vector3D getDirection() const;
 
         /**
          * @brief Get the intensity of the light at a specific point
@@ -43,7 +43,7 @@ namespace RayTracer {
          * @param point The point at which to calculate the light intensity
          * @return double The intensity value at the given point
          */
-        double getIntensity(const Math::Point3D& point) const override;
+        double getIntensity() const;
 
         /**
          * @brief Get the color of the light

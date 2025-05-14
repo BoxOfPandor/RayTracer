@@ -90,7 +90,7 @@ Vector3D Scene::traceRay(const Ray& ray, int depth) const
     const IMaterial& material = intersection.primitive->getMaterial();
 
     // Material base color at intersection point
-    Vector3D materialColor = material.getColor(intersection.point);
+    Vector3D materialColor = material.getColor();
     
     // Start with ambient component
     Vector3D ambientComponent = materialColor * material.getAmbient();
@@ -119,9 +119,9 @@ Vector3D Scene::traceRay(const Ray& ray, int depth) const
         }
         
         // Get light properties
-        Vector3D lightDir = light->getDirection(intersection.point);
+        Vector3D lightDir = light->getDirection();
         Vector3D lightColor = light->getColor();
-        double lightIntensity = light->getIntensity(intersection.point);
+        double lightIntensity = light->getIntensity();
         
         // Calculate diffuse factor
         double diffuseFactor = std::max(0.0, Vector3D::dot(intersection.normal, lightDir * -1));
