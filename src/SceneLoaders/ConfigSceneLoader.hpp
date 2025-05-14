@@ -1,6 +1,6 @@
 /*
 ** EPITECH PROJECT, 2025
-** B-OOP-400-LIL-4-1-raytracer-thibault.pouch
+** B_OOP_400_LIL_4_1_raytracer_thibault_pouch
 ** File description:
 ** ConfigSceneLoader
 */
@@ -12,10 +12,12 @@
 #include "Point3D.hpp"
 #include "Rectangle3D.hpp"
 #include "IMaterial.hpp"
+#include "SceneBuilder.hpp"
 #include <libconfig.h++>
 #include <vector>
 #include <memory>
 #include <string>
+#include <map>
 
 namespace RayTracer {
     class Scene;
@@ -28,24 +30,19 @@ namespace RayTracer {
         std::unique_ptr<Scene> loadScene(const std::string& filename) const override;
 
     private:
-        // Helper methods for different components
         void parseCamera(const libconfig::Setting& cameraSettings,
-                         int& width, int& height, Math::Point3D& position,
-                         Rectangle3D& screen) const;
-        void parsePrimitives(const libconfig::Setting& primitivesSettings,
-                     Scene& scene) const;
-        void parseLights(const libconfig::Setting& lightsSettings,
-                         Scene& scene) const;
-
-        // Helpers for primitives
-        void parseSpheres(const libconfig::Setting& spheres, Scene& scene,
+                       int& width, int& height,
+                       Math::Point3D& position,
+                       Rectangle3D& screen) const;
+        void parsePrimitives(const libconfig::Setting& primitivesSettings, SceneBuilder& builder) const;
+        void parseLights(const libconfig::Setting& lightsSettings, SceneBuilder& builder) const;
+        void parseSphere(const libconfig::Setting& sphere, SceneBuilder& builder, 
                          std::vector<std::shared_ptr<IMaterial>>& materials) const;
-        void parsePlanes(const libconfig::Setting& planes, Scene& scene,
-                        std::vector<std::shared_ptr<IMaterial>>& materials) const;
-        
-        // Helpers for lights
-        void parsePointLights(const libconfig::Setting& lights, Scene& scene) const;
-        void parseDirectionalLights(const libconfig::Setting& lights, Scene& scene) const;
+        void parseCylinder(const libconfig::Setting& cylinder, SceneBuilder& builder,
+                           std::vector<std::shared_ptr<IMaterial>>& materials) const;
+        void parseDirectionalLight(const libconfig::Setting& light, SceneBuilder& builder) const;
+        Math::Vector3D parseColor(const libconfig::Setting& setting) const;
+        std::map<std::string, double> parseMaterialProperties(const libconfig::Setting& setting) const;
     };
 }
 
