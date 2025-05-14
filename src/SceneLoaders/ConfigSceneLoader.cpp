@@ -17,8 +17,9 @@
 #include <stdexcept>
 #include <map>
 #include "LightFactory.hpp"
+#include "PrimitiveFactory.hpp"
+#include "MaterialFactory.hpp"
 #include "SceneBuilder.hpp"
-
 
 using namespace RayTracer;
 using namespace libconfig;
@@ -99,105 +100,129 @@ void ConfigSceneLoader::parseCamera(const Setting& cameraSettings,
 void ConfigSceneLoader::parsePrimitives(const Setting& primitivesSettings, SceneBuilder& builder) const
 {
     static std::vector<std::shared_ptr<IMaterial>> materials;
-
-    if (primitivesSettings.exists("spheres"))
-        parseSpheres(primitivesSettings["spheres"], builder, materials);
-
-    if (primitivesSettings.exists("planes"))
-        parsePlanes(primitivesSettings["planes"], builder, materials);
-        
-    if (primitivesSettings.exists("cylinders"))
-        parseCylinders(primitivesSettings["cylinders"], builder, materials);
-}
-
-void ConfigSceneLoader::parseCylinders(const Setting& cylinders, SceneBuilder& builder,
-                                     std::vector<std::shared_ptr<IMaterial>>& materials) const
-{
-    for (int i = 0; i < cylinders.getLength(); ++i) {
-        const Setting& cylinder = cylinders[i];
-
-        double x = 0, y = 0, z = 0;
-        cylinder.lookupValue("x", x);
-        cylinder.lookupValue("y", y);
-        cylinder.lookupValue("z", z);
-
-        double dirX = 0, dirY = 1, dirZ = 0;
-        if (cylinder.exists("direction")) {
-            const Setting& direction = cylinder["direction"];
-            direction.lookupValue("x", dirX);
-            direction.lookupValue("y", dirY);
-            direction.lookupValue("z", dirZ);
+    
+    if (primitivesSettings.exists("spheres")) {
+        const Setting& spheres = primitivesSettings["spheres"];
+        for (int i = 0; i < spheres.getLength(); ++i) {
+            const Setting& sphere = spheres[i];
+            
+            double x = 0.0, y = 0.0, z = 0.0;
+            if (sphere.exists("x")) sphere.lookupValue("x", x);
+            if (sphere.exists("y")) sphere.lookupValue("y", y);
+            if (sphere.exists("z")) sphere.lookupValue("z", z);
+            
+            double radius = 1.0;
+            if (sphere.exists("r")) sphere.lookupValue("r", radius);
+            
+            double r = 1.0, g = 1.0, b = 1.0;
+            
+            if (sphere.exists("color")) {
+                const Setting& color = sphere["color"];
+                int redInt = 255, greenInt = 255, blueInt = 255;
+                
+                if (color.exists("r")) color.lookupValue("r", redInt);
+                if (color.exists("g")) color.lookupValue("g", greenInt);
+                if (color.exists("b")) color.lookupValue("b", blueInt);
+                
+                r = redInt / 255.0;
+                g = greenInt / 255.0;
+                b = blueInt / 255.0;
+            }
+            
+            std::map<std::string, double> materialParams;
+            double ambient = 0.1, diffuse = 0.7, specular = 0.2, shininess = 50.0;
+            
+            if (sphere.exists("material")) {
+                const Setting& matSettings = sphere["material"];
+                if (matSettings.exists("ambient")) matSettings.lookupValue("ambient", ambient);
+                if (matSettings.exists("diffuse")) matSettings.lookupValue("diffuse", diffuse);
+                if (matSettings.exists("specular")) matSettings.lookupValue("specular", specular);
+                if (matSettings.exists("shininess")) matSettings.lookupValue("shininess", shininess);
+            }
+            
+            materialParams["ambient"] = ambient;
+            materialParams["diffuse"] = diffuse;
+            materialParams["specular"] = specular;
+            materialParams["shininess"] = shininess;
+            
+            auto material = MaterialFactory::createMaterial("flat", Vector3D(r, g, b), materialParams);
+            materials.push_back(material); // Store material to keep it alive
+            
+            auto sphereObj = std::make_unique<Sphere>(
+                Math::Point3D(x, y, z), radius, *material
+            );
+            
+            builder.addPrimitive(std::move(sphereObj));
         }
-        
-        double radius = 1.0, height = 1.0;
-        cylinder.lookupValue("r", radius);
-        cylinder.lookupValue("height", height);
-
-        int red = 255, green = 255, blue = 255;
-        if (cylinder.exists("color")) {
-            const Setting& color = cylinder["color"];
-            color.lookupValue("r", red);
-            color.lookupValue("g", green);
-            color.lookupValue("b", blue);
-        }
-        
-        auto material = std::make_shared<FlatMaterial>(
-            Vector3D(red/255.0, green/255.0, blue/255.0)
-        );
-        materials.push_back(material);
-
-        auto cylinderObj = std::make_unique<Cylinder>(
-            Point3D(x, y, z), 
-            Vector3D(dirX, dirY, dirZ),
-            radius, 
-            height, 
-            *material
-        );
-
-        builder.addPrimitive(std::move(cylinderObj));
     }
-}
-
-void ConfigSceneLoader::parseSpheres(const Setting& spheres, SceneBuilder& builder,
-                                    std::vector<std::shared_ptr<IMaterial>>& materials) const
-{
-    for (int i = 0; i < spheres.getLength(); ++i) {
-        const Setting& sphere = spheres[i];
-
-        double x = 0, y = 0, z = 0, r = 1;
-        sphere.lookupValue("x", x);
-        sphere.lookupValue("y", y);
-        sphere.lookupValue("z", z);
-        sphere.lookupValue("r", r);
-
-        int red = 255, green = 255, blue = 255;
-        if (sphere.exists("color")) {
-            const Setting& color = sphere["color"];
-            color.lookupValue("r", red);
-            color.lookupValue("g", green);
-            color.lookupValue("b", blue);
+    
+    if (primitivesSettings.exists("cylinders")) {
+        const Setting& cylinders = primitivesSettings["cylinders"];
+        for (int i = 0; i < cylinders.getLength(); ++i) {
+            const Setting& cylinder = cylinders[i];
+            
+            double x = 0.0, y = 0.0, z = 0.0;
+            if (cylinder.exists("x")) cylinder.lookupValue("x", x);
+            if (cylinder.exists("y")) cylinder.lookupValue("y", y);
+            if (cylinder.exists("z")) cylinder.lookupValue("z", z);
+            
+            double dirX = 0.0, dirY = 1.0, dirZ = 0.0;
+            if (cylinder.exists("direction")) {
+                const Setting& dir = cylinder["direction"];
+                if (dir.exists("x")) dir.lookupValue("x", dirX);
+                if (dir.exists("y")) dir.lookupValue("y", dirY);
+                if (dir.exists("z")) dir.lookupValue("z", dirZ);
+            }
+            
+            double radius = 1.0, height = 1.0;
+            if (cylinder.exists("r")) cylinder.lookupValue("r", radius);
+            if (cylinder.exists("height")) cylinder.lookupValue("height", height);
+            
+            double r = 1.0, g = 1.0, b = 1.0;
+            
+            if (cylinder.exists("color")) {
+                const Setting& color = cylinder["color"];
+                int redInt = 255, greenInt = 255, blueInt = 255;
+                
+                if (color.exists("r")) color.lookupValue("r", redInt);
+                if (color.exists("g")) color.lookupValue("g", greenInt);
+                if (color.exists("b")) color.lookupValue("b", blueInt);
+                
+                r = redInt / 255.0;
+                g = greenInt / 255.0;
+                b = blueInt / 255.0;
+            }
+            
+            std::map<std::string, double> materialParams;
+            double ambient = 0.1, diffuse = 0.7, specular = 0.2, shininess = 50.0;
+            
+            if (cylinder.exists("material")) {
+                const Setting& matSettings = cylinder["material"];
+                if (matSettings.exists("ambient")) matSettings.lookupValue("ambient", ambient);
+                if (matSettings.exists("diffuse")) matSettings.lookupValue("diffuse", diffuse);
+                if (matSettings.exists("specular")) matSettings.lookupValue("specular", specular);
+                if (matSettings.exists("shininess")) matSettings.lookupValue("shininess", shininess);
+            }
+            
+            materialParams["ambient"] = ambient;
+            materialParams["diffuse"] = diffuse;
+            materialParams["specular"] = specular;
+            materialParams["shininess"] = shininess;
+            
+            auto material = MaterialFactory::createMaterial("flat", Vector3D(r, g, b), materialParams);
+            materials.push_back(material);
+            
+            auto cylinderObj = std::make_unique<Cylinder>(
+                Math::Point3D(x, y, z), 
+                Math::Vector3D(dirX, dirY, dirZ),
+                radius, 
+                height, 
+                *material
+            );
+            
+            builder.addPrimitive(std::move(cylinderObj));
         }
-
-        auto material = std::make_shared<FlatMaterial>(
-            Vector3D(red/255.0, green/255.0, blue/255.0)
-        );
-        materials.push_back(material);
-
-        auto sphereObj = std::make_unique<Sphere>(
-            Point3D(x, y, z), r, *material
-        );
-
-        builder.addPrimitive(std::move(sphereObj));
     }
-}
-
-void ConfigSceneLoader::parsePlanes(const Setting& planes, SceneBuilder& builder,
-                                  std::vector<std::shared_ptr<IMaterial>>& materials) const
-{
-    // Will be implemented when Plane class is available
-    (void)planes;
-    (void)builder;
-    (void)materials;
 }
 
 void ConfigSceneLoader::parseLights(const Setting& lightsSettings, SceneBuilder& builder) const
@@ -259,4 +284,3 @@ void ConfigSceneLoader::parseLights(const Setting& lightsSettings, SceneBuilder&
         std::cout << "Point lights found but not implemented yet" << std::endl;
     }
 }
-
