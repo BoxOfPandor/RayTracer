@@ -31,13 +31,18 @@ namespace RayTracer {
 
     private:
         void parseCamera(const libconfig::Setting& cameraSettings,
-                         int& width, int& height, Math::Point3D& position,
-                         Rectangle3D& screen) const;
-        
-        void parsePrimitives(const libconfig::Setting& primitivesSettings,
-                     SceneBuilder& builder) const;
-        void parseLights(const libconfig::Setting& lightsSettings,
-                         SceneBuilder& builder) const;
+                       int& width, int& height,
+                       Math::Point3D& position,
+                       Rectangle3D& screen) const;
+        void parsePrimitives(const libconfig::Setting& primitivesSettings, SceneBuilder& builder) const;
+        void parseLights(const libconfig::Setting& lightsSettings, SceneBuilder& builder) const;
+        void parseSphere(const libconfig::Setting& sphere, SceneBuilder& builder, 
+                         std::vector<std::shared_ptr<IMaterial>>& materials) const;
+        void parseCylinder(const libconfig::Setting& cylinder, SceneBuilder& builder,
+                           std::vector<std::shared_ptr<IMaterial>>& materials) const;
+        void parseDirectionalLight(const libconfig::Setting& light, SceneBuilder& builder) const;
+        Math::Vector3D parseColor(const libconfig::Setting& setting) const;
+        std::map<std::string, double> parseMaterialProperties(const libconfig::Setting& setting) const;
     };
 }
 
