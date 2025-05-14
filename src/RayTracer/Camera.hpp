@@ -17,6 +17,7 @@ namespace RayTracer {
     public:
         Camera();
         Camera(const Math::Point3D& origin, const Rectangle3D& screen);
+        Camera(const Math::Point3D& origin, double screenDistance, int imageWidth, int imageHeight);
         Camera(const Camera& other);
         ~Camera() = default;
 
@@ -24,6 +25,7 @@ namespace RayTracer {
         Rectangle3D getScreen() const;
         void setOrigin(const Math::Point3D& origin);
         void setScreen(const Rectangle3D& screen);
+        void updateScreenForDimensions(int width, int height);
 
         Camera& operator=(const Camera& other);
         Ray ray(double u, double v) const;

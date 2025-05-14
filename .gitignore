@@ -39,4 +39,5 @@ CMakeLists.txt
 cmake-build-debug
 build
 *.ppm
+*.png
 raytracer
