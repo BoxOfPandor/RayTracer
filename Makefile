@@ -19,6 +19,8 @@ INCLUDE_DIRS = -I$(SRC_DIR) \
                -I$(SRC_DIR)/Lights \
                -I$(SRC_DIR)/Renders \
                -I$(SRC_DIR)/SceneLoaders \
+               -I$(SRC_DIR)/Builders \
+               -I$(SRC_DIR)/Factories
 
 
 SRCS := $(shell find $(SRC_DIR) -name "*.cpp")

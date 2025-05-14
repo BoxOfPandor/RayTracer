@@ -8,6 +8,8 @@
 #include "Scene.hpp"
 #include <limits>
 #include <algorithm>
+#include <ostream>
+#include <iostream>
 
 using namespace RayTracer;
 using namespace Math;
@@ -87,34 +89,73 @@ Vector3D Scene::traceRay(const Ray& ray, int depth) const
     // Get material of the intersected object
     const IMaterial& material = intersection.primitive->getMaterial();
 
-    // Calculate lighting
-    Vector3D color = material.getColor() * material.getAmbient();
+    // Material base color at intersection point
+    Vector3D materialColor = material.getColor(intersection.point);
+    
+    // Start with ambient component
+    Vector3D ambientComponent = materialColor * material.getAmbient();
+    Vector3D finalColor = ambientComponent;
+    
+    // Debug: Print information about the lights
+    static bool debugPrinted = false;
+    if (!debugPrinted) {
+        std::cout << "==== LIGHT DEBUG INFO ====" << std::endl;
+        int lightIndex = 0;
+        for (const auto& light : _lights) {
+            Vector3D lightColor = light->getColor();
+            std::cout << "Light #" << lightIndex++ << " Color: "
+                     << "R=" << lightColor.getX() 
+                     << ", G=" << lightColor.getY() 
+                     << ", B=" << lightColor.getZ() << std::endl;
+        }
+        std::cout << "=========================" << std::endl;
+        debugPrinted = true;
+    }
 
     for (const auto& light : _lights) {
-        if (!light->isShadowed(intersection.point, *this)) {
-            Vector3D lightDir = light->getDirection();
-            double diffuseIntensity = std::max(0.0, Vector3D::dot(intersection.normal, lightDir * -1));
-
-            if (diffuseIntensity > 0) {
-                // Diffuse lighting
-                Vector3D diffuse = material.getColor() * diffuseIntensity * material.getDiffuse();
-
-                // Specular lighting
-                Vector3D viewDir = ray.getDirection() * -1;
-                Vector3D halfwayDir = (viewDir + (lightDir * -1)) / (viewDir + (lightDir * -1)).length();
-                double specularIntensity = std::pow(std::max(0.0, Vector3D::dot(intersection.normal, halfwayDir)), material.getShininess());
-                Vector3D specular = light->getColor() * specularIntensity * material.getSpecular();
-
-                color = color + (diffuse + specular) * light->getIntensity() * light->getColor();
+        // Skip if in shadow
+        if (light->isShadowed(intersection.point, *this)) {
+            continue;
+        }
+        
+        // Get light properties
+        Vector3D lightDir = light->getDirection(intersection.point);
+        Vector3D lightColor = light->getColor();
+        double lightIntensity = light->getIntensity(intersection.point);
+        
+        // Calculate diffuse factor
+        double diffuseFactor = std::max(0.0, Vector3D::dot(intersection.normal, lightDir * -1));
+        
+        if (diffuseFactor > 0) {
+            // Calculate diffuse component (material color * light color)
+            Vector3D diffuseComponent = materialColor * lightColor * diffuseFactor * material.getDiffuse() * lightIntensity;
+            
+            // Calculate specular component
+            Vector3D viewDir = ray.getDirection() * -1;
+            Vector3D halfwayDir = (viewDir + (lightDir * -1));
+            double halfwayLength = halfwayDir.length();
+            
+            if (halfwayLength > 0.0001) {
+                halfwayDir = halfwayDir / halfwayLength; // Normalize
+                double specularFactor = std::pow(
+                    std::max(0.0, Vector3D::dot(intersection.normal, halfwayDir)), 
+                    material.getShininess()
+                );
+                Vector3D specularComponent = lightColor * specularFactor * material.getSpecular() * lightIntensity;
+                
+                // Add diffuse and specular to final color
+                finalColor = finalColor + diffuseComponent + specularComponent;
+            } else {
+                // Just add diffuse if we can't calculate specular
+                finalColor = finalColor + diffuseComponent;
             }
         }
     }
 
     // Clamp color values to [0,1]
     return Vector3D(
-        std::min(1.0, std::max(0.0, color.getX())),
-        std::min(1.0, std::max(0.0, color.getY())),
-        std::min(1.0, std::max(0.0, color.getZ()))
+        std::min(1.0, std::max(0.0, finalColor.getX())),
+        std::min(1.0, std::max(0.0, finalColor.getY())),
+        std::min(1.0, std::max(0.0, finalColor.getZ()))
     );
 }
-

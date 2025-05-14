@@ -16,12 +16,11 @@ using namespace Math;
 DirectionalLight::DirectionalLight(const Vector3D& direction, const Vector3D& color, double intensity)
     : _color(color), _intensity(intensity)
 {
-    // Normalizing the direction vector
     double length = direction.length();
     if (length > 0) {
         _direction = direction / length;
     } else {
-        _direction = Vector3D(0, 0, -1); // Default direction if provided vector is zero
+        _direction = Vector3D(0, 0, -1);
     }
 }
 
@@ -42,7 +41,7 @@ Vector3D DirectionalLight::getColor() const
 
 bool DirectionalLight::isShadowed(const Point3D& point, const Scene& scene) const
 {
-    Ray shadowRay(point, _direction * -1); // Ray in opposite direction of light
+    Ray shadowRay(point, _direction * -1);
 
     for (const auto& primitive : scene.getPrimitives()) {
         if (primitive->hits(shadowRay)) {

@@ -1,6 +1,6 @@
 /*
 ** EPITECH PROJECT, 2025
-** B-OOP-400-LIL-4-1-raytracer-thibault.pouch
+** B_OOP_400_LIL_4_1_raytracer_thibault_pouch
 ** File description:
 ** ConfigSceneLoader
 */
@@ -9,11 +9,17 @@
 #include "Scene.hpp"
 #include "Camera.hpp"
 #include "Sphere.hpp"
+#include "Cylinder.hpp"
 #include "FlatMaterial.hpp"
 #include "DirectionalLight.hpp"
 #include <iostream>
 #include <cmath>
 #include <stdexcept>
+#include <map>
+#include "LightFactory.hpp"
+#include "PrimitiveFactory.hpp"
+#include "MaterialFactory.hpp"
+#include "SceneBuilder.hpp"
 
 using namespace RayTracer;
 using namespace libconfig;
@@ -32,7 +38,9 @@ std::unique_ptr<Scene> ConfigSceneLoader::loadScene(const std::string& filename)
                                " at line " + std::to_string(e.getLine()) +
                                ": " + e.getError());
     }
-
+    
+    SceneBuilder builder;
+    
     int width = 800, height = 600;
     Point3D position(0, 0, 0);
     Rectangle3D screen;
@@ -42,17 +50,17 @@ std::unique_ptr<Scene> ConfigSceneLoader::loadScene(const std::string& filename)
     }
 
     Camera camera(position, screen);
-    auto scene = std::make_unique<Scene>(camera, width, height);
+    builder.setCamera(camera).setResolution(width, height);
 
     if (config.exists("primitives")) {
-        parsePrimitives(config.lookup("primitives"), *scene);
+        parsePrimitives(config.lookup("primitives"), builder);
     }
 
     if (config.exists("lights")) {
-        parseLights(config.lookup("lights"), *scene);
+        parseLights(config.lookup("lights"), builder);
     }
 
-    return scene;
+    return builder.build();
 }
 
 void ConfigSceneLoader::parseCamera(const Setting& cameraSettings,
@@ -89,60 +97,26 @@ void ConfigSceneLoader::parseCamera(const Setting& cameraSettings,
     screen = Rectangle3D(screenOrigin, bottomSide, leftSide);
 }
 
-void ConfigSceneLoader::parsePrimitives(const Setting& primitivesSettings, Scene& scene) const
+void ConfigSceneLoader::parsePrimitives(const Setting& primitivesSettings, SceneBuilder& builder) const
 {
     static std::vector<std::shared_ptr<IMaterial>> materials;
-
-    if (primitivesSettings.exists("spheres"))
-        parseSpheres(primitivesSettings["spheres"], scene, materials);
-
-    if (primitivesSettings.exists("planes"))
-        parsePlanes(primitivesSettings["planes"], scene, materials);
-}
-
-void ConfigSceneLoader::parseSpheres(const Setting& spheres, Scene& scene,
-                                    std::vector<std::shared_ptr<IMaterial>>& materials) const
-{
-    for (int i = 0; i < spheres.getLength(); ++i) {
-        const Setting& sphere = spheres[i];
-
-        double x = 0, y = 0, z = 0, r = 1;
-        sphere.lookupValue("x", x);
-        sphere.lookupValue("y", y);
-        sphere.lookupValue("z", z);
-        sphere.lookupValue("r", r);
-
-        int red = 255, green = 255, blue = 255;
-        if (sphere.exists("color")) {
-            const Setting& color = sphere["color"];
-            color.lookupValue("r", red);
-            color.lookupValue("g", green);
-            color.lookupValue("b", blue);
+    
+    if (primitivesSettings.exists("spheres")) {
+        const Setting& spheres = primitivesSettings["spheres"];
+        for (int i = 0; i < spheres.getLength(); ++i) {
+            parseSphere(spheres[i], builder, materials);
         }
-
-        auto material = std::make_shared<FlatMaterial>(
-            Vector3D(red/255.0, green/255.0, blue/255.0)
-        );
-        materials.push_back(material);
-
-        auto sphereObj = std::make_unique<Sphere>(
-            Point3D(x, y, z), r, *material
-        );
-
-        scene.addPrimitive(std::move(sphereObj));
+    }
+    
+    if (primitivesSettings.exists("cylinders")) {
+        const Setting& cylinders = primitivesSettings["cylinders"];
+        for (int i = 0; i < cylinders.getLength(); ++i) {
+            parseCylinder(cylinders[i], builder, materials);
+        }
     }
 }
 
-void ConfigSceneLoader::parsePlanes(const Setting& planes, Scene& scene,
-                                  std::vector<std::shared_ptr<IMaterial>>& materials) const
-{
-    // Will be implemented when Plane class is available
-    (void)planes;
-    (void)scene;
-    (void)materials;
-}
-
-void ConfigSceneLoader::parseLights(const Setting& lightsSettings, Scene& scene) const
+void ConfigSceneLoader::parseLights(const Setting& lightsSettings, SceneBuilder& builder) const
 {
     double ambient = 0.1;
     double diffuse = 0.7;
@@ -152,52 +126,146 @@ void ConfigSceneLoader::parseLights(const Setting& lightsSettings, Scene& scene)
     if (lightsSettings.exists("diffuse"))
         lightsSettings.lookupValue("diffuse", diffuse);
 
-    if (lightsSettings.exists("point")) {
-        parsePointLights(lightsSettings["point"], scene);
-    }
-
     if (lightsSettings.exists("directional")) {
-        parseDirectionalLights(lightsSettings["directional"], scene);
-    }
-}
-
-void ConfigSceneLoader::parsePointLights(const Setting& lights, Scene& scene) const
-{
-
-}
-
-void ConfigSceneLoader::parseDirectionalLights(const Setting& lights, Scene& scene) const
-{
-    for (int i = 0; i < lights.getLength(); ++i) {
-        const Setting& light = lights[i];
-
-        double x = 0, y = 0, z = -1;
-        double r = 1.0, g = 1.0, b = 1.0;
-        double intensity = 1.0;
-
-        if (light.exists("x")) light.lookupValue("x", x);
-        if (light.exists("y")) light.lookupValue("y", y);
-        if (light.exists("z")) light.lookupValue("z", z);
-
-        if (light.exists("color")) {
-            const Setting& color = light["color"];
-            if (color.exists("r")) color.lookupValue("r", r);
-            if (color.exists("g")) color.lookupValue("g", g);
-            if (color.exists("b")) color.lookupValue("b", b);
-
-            r /= 255.0;
-            g /= 255.0;
-            b /= 255.0;
+        const Setting& lights = lightsSettings["directional"];
+        for (int i = 0; i < lights.getLength(); ++i) {
+            parseDirectionalLight(lights[i], builder);
         }
-
-        light.lookupValue("intensity", intensity);
-
-        auto dirLight = std::make_unique<DirectionalLight>(
-            Math::Vector3D(x, y, z),
-            Math::Vector3D(r, g, b),
-            intensity
-        );
-
-        scene.addLight(std::move(dirLight));
     }
+    
+    if (lightsSettings.exists("point")) {
+        std::cout << "Point lights found but not implemented yet" << std::endl;
+    }
+}
+
+void ConfigSceneLoader::parseSphere(const Setting& sphere, SceneBuilder& builder, 
+                                  std::vector<std::shared_ptr<IMaterial>>& materials) const
+{
+    double x = 0.0, y = 0.0, z = 0.0;
+    if (sphere.exists("x")) sphere.lookupValue("x", x);
+    if (sphere.exists("y")) sphere.lookupValue("y", y);
+    if (sphere.exists("z")) sphere.lookupValue("z", z);
+    
+    double radius = 1.0;
+    if (sphere.exists("r")) sphere.lookupValue("r", radius);
+    
+    Vector3D color = parseColor(sphere);
+    std::map<std::string, double> materialParams = parseMaterialProperties(sphere);
+    
+    auto material = MaterialFactory::createMaterial("flat", color, materialParams);
+    materials.push_back(material); // Store material to keep it alive
+    
+    auto sphereObj = std::make_unique<Sphere>(
+        Math::Point3D(x, y, z), radius, *material
+    );
+    
+    builder.addPrimitive(std::move(sphereObj));
+}
+
+void ConfigSceneLoader::parseCylinder(const Setting& cylinder, SceneBuilder& builder,
+                                    std::vector<std::shared_ptr<IMaterial>>& materials) const
+{
+    double x = 0.0, y = 0.0, z = 0.0;
+    if (cylinder.exists("x")) cylinder.lookupValue("x", x);
+    if (cylinder.exists("y")) cylinder.lookupValue("y", y);
+    if (cylinder.exists("z")) cylinder.lookupValue("z", z);
+    
+    double dirX = 0.0, dirY = 1.0, dirZ = 0.0;
+    if (cylinder.exists("direction")) {
+        const Setting& dir = cylinder["direction"];
+        if (dir.exists("x")) dir.lookupValue("x", dirX);
+        if (dir.exists("y")) dir.lookupValue("y", dirY);
+        if (dir.exists("z")) dir.lookupValue("z", dirZ);
+    }
+    
+    double radius = 1.0, height = 1.0;
+    if (cylinder.exists("r")) cylinder.lookupValue("r", radius);
+    if (cylinder.exists("height")) cylinder.lookupValue("height", height);
+    
+    Vector3D color = parseColor(cylinder);
+    std::map<std::string, double> materialParams = parseMaterialProperties(cylinder);
+    
+    auto material = MaterialFactory::createMaterial("flat", color, materialParams);
+    materials.push_back(material);
+    
+    auto cylinderObj = std::make_unique<Cylinder>(
+        Math::Point3D(x, y, z), 
+        Math::Vector3D(dirX, dirY, dirZ),
+        radius, 
+        height, 
+        *material
+    );
+    
+    builder.addPrimitive(std::move(cylinderObj));
+}
+
+void ConfigSceneLoader::parseDirectionalLight(const Setting& light, SceneBuilder& builder) const
+{
+    std::map<std::string, double> params;
+    double x = 0, y = -1, z = 0, intensity = 1.0;
+    
+    if (light.exists("direction")) {
+        const Setting& dir = light["direction"];
+        if (dir.exists("x")) { dir.lookupValue("x", x); params["x"] = x; }
+        if (dir.exists("y")) { dir.lookupValue("y", y); params["y"] = y; }
+        if (dir.exists("z")) { dir.lookupValue("z", z); params["z"] = z; }
+    } else {
+        if (light.exists("x")) { light.lookupValue("x", x); params["x"] = x; }
+        if (light.exists("y")) { light.lookupValue("y", y); params["y"] = y; }
+        if (light.exists("z")) { light.lookupValue("z", z); params["z"] = z; }
+    }
+    
+    light.lookupValue("intensity", intensity);
+    params["intensity"] = intensity;
+    
+    Vector3D color = parseColor(light);
+    
+    try {
+        auto dirLight = LightFactory::createLight("directional", params, color);
+        builder.addLight(std::move(dirLight));
+    } catch (const std::exception& e) {
+        std::cerr << "Error creating directional light: " << e.what() << std::endl;
+        throw;
+    }
+}
+
+Math::Vector3D ConfigSceneLoader::parseColor(const Setting& setting) const
+{
+    double r = 1.0, g = 1.0, b = 1.0;
+    
+    if (setting.exists("color")) {
+        const Setting& color = setting["color"];
+        int redInt = 255, greenInt = 255, blueInt = 255;
+        
+        if (color.exists("r")) color.lookupValue("r", redInt);
+        if (color.exists("g")) color.lookupValue("g", greenInt);
+        if (color.exists("b")) color.lookupValue("b", blueInt);
+        
+        r = redInt / 255.0;
+        g = greenInt / 255.0;
+        b = blueInt / 255.0;
+    }
+    
+    return Vector3D(r, g, b);
+}
+
+std::map<std::string, double> ConfigSceneLoader::parseMaterialProperties(const Setting& setting) const
+{
+    std::map<std::string, double> materialParams;
+    double ambient = 0.1, diffuse = 0.7, specular = 0.2, shininess = 50.0;
+    
+    if (setting.exists("material")) {
+        const Setting& matSettings = setting["material"];
+        if (matSettings.exists("ambient")) matSettings.lookupValue("ambient", ambient);
+        if (matSettings.exists("diffuse")) matSettings.lookupValue("diffuse", diffuse);
+        if (matSettings.exists("specular")) matSettings.lookupValue("specular", specular);
+        if (matSettings.exists("shininess")) matSettings.lookupValue("shininess", shininess);
+    }
+    
+    materialParams["ambient"] = ambient;
+    materialParams["diffuse"] = diffuse;
+    materialParams["specular"] = specular;
+    materialParams["shininess"] = shininess;
+    
+    return materialParams;
 }
