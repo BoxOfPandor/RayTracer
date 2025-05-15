@@ -63,9 +63,9 @@ namespace RayTracer {
         bool isShadowed(const Math::Point3D& point, const Scene& scene) const override;
 
     private:
-        Math::Vector3D _direction; /**< Normalized direction of the light rays */
-        Math::Vector3D _color;     /**< RGB color of the light */
-        double _intensity;         /**< Intensity of the light */
+        Math::Vector3D _direction;
+        Math::Vector3D _color;
+        double _intensity;
     };
 }
 

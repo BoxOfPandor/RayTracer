@@ -41,7 +41,6 @@ int main(int argc, char* argv[])
         std::string sceneFile = "default_scene.cfg";
         bool useSceneFile = false;
 
-        // Parse command line arguments
         for (int i = 1; i < argc; ++i) {
             if (strcmp(argv[i], "--ppm") == 0 && i + 1 < argc) {
                 useSFML = false;
@@ -69,7 +68,6 @@ int main(int argc, char* argv[])
             }
         }
 
-        // Create scene from file or default
         std::unique_ptr<Scene> scene;
 
         if (useSceneFile) {
@@ -87,7 +85,6 @@ int main(int argc, char* argv[])
             return 84;
         }
 
-        // Render the scene with the selected renderer
         if (useSFML) {
             std::cout << "Rendering with SFML renderer..." << std::endl;
             SFMLRenderer renderer(numThreads);

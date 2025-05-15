@@ -22,10 +22,9 @@ std::shared_ptr<IMaterial> MaterialFactory::createMaterial(
         double diffuse = params.count("diffuse") ? params.at("diffuse") : 0.7;
         double specular = params.count("specular") ? params.at("specular") : 0.2;
         double shininess = params.count("shininess") ? params.at("shininess") : 50.0;
-        
+
         return std::make_shared<FlatMaterial>(color, ambient, diffuse, specular, shininess);
     }
-    // Add other material types here as needed
-    
+
     throw std::runtime_error("Unknown material type: " + type);
 }
