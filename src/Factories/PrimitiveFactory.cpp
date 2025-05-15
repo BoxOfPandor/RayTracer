@@ -8,6 +8,7 @@
 #include "PrimitiveFactory.hpp"
 #include "Sphere.hpp"
 #include "Cylinder.hpp"
+#include "Plane.hpp"
 #include <stdexcept>
 
 using namespace RayTracer;
@@ -43,6 +44,20 @@ std::unique_ptr<IPrimitive> PrimitiveFactory::createPrimitive(
         Vector3D direction(dirX, dirY, dirZ);
 
         return std::make_unique<Cylinder>(origin, direction, radius, height, material);
+    }
+    else if (type == "plane") {
+        double x = params.count("x") ? params.at("x") : 0.0;
+        double y = params.count("y") ? params.at("y") : 0.0;
+        double z = params.count("z") ? params.at("z") : 0.0;
+
+        double normalX = params.count("normalX") ? params.at("normalX") : 0.0;
+        double normalY = params.count("normalY") ? params.at("normalY") : 1.0;
+        double normalZ = params.count("normalZ") ? params.at("normalZ") : 0.0;
+
+        Point3D point(x, y, z);
+        Vector3D normal(normalX, normalY, normalZ);
+
+        return std::make_unique<Plane>(point, normal, material);
     }
 
     throw std::runtime_error("Unknown primitive type: " + type);
