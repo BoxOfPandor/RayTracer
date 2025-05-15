@@ -36,6 +36,8 @@ namespace RayTracer {
                        Rectangle3D& screen) const;
         void parsePrimitives(const libconfig::Setting& primitivesSettings, SceneBuilder& builder) const;
         void parseLights(const libconfig::Setting& lightsSettings, SceneBuilder& builder) const;
+        void parsePlane(const libconfig::Setting& plane, SceneBuilder& builder,
+                       std::vector<std::shared_ptr<IMaterial>>& materials) const;
         void parseSphere(const libconfig::Setting& sphere, SceneBuilder& builder, 
                          std::vector<std::shared_ptr<IMaterial>>& materials) const;
         void parseCylinder(const libconfig::Setting& cylinder, SceneBuilder& builder,
