@@ -22,6 +22,8 @@ namespace Math {
 
         double length() const;
         static double dot(const Vector3D& vec1, const Vector3D& vec2);
+        Vector3D normalize() const;
+        Vector3D cross(const Vector3D& v) const;
 
         Vector3D operator+(const Vector3D& other) const;
         void operator+=(const Vector3D& other);

@@ -50,17 +50,26 @@ void Plane::translate(const Math::Vector3D& translation)
 
 void Plane::rotateX(double angle)
 {
-    (void)angle;
+    Vector3D axis = Vector3D(1, 0, 0).normalize();
+    _origin = _origin * std::cos(angle) +
+              axis.cross(_origin) * std::sin(angle) +
+              axis * axis.dot(_origin) * (1 - std::cos(angle));
 }
 
 void Plane::rotateY(double angle)
 {
-    (void)angle;
+    Vector3D axis = Vector3D(0, 1, 0).normalize();
+    _origin = _origin * std::cos(angle) +
+              axis.cross(_origin) * std::sin(angle) +
+              axis * axis.dot(_origin) * (1 - std::cos(angle));
 }
 
 void Plane::rotateZ(double angle)
 {
-    (void)angle;
+    Vector3D axis = Vector3D(0, 0, 1).normalize();
+    _origin = _origin * std::cos(angle) +
+              axis.cross(_origin) * std::sin(angle) +
+              axis * axis.dot(_origin) * (1 - std::cos(angle));
 }
 
 const IMaterial& Plane::getMaterial() const
