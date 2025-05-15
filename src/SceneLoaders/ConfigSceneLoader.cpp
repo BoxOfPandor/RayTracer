@@ -201,7 +201,7 @@ void ConfigSceneLoader::parseSphere(const Setting& sphere, SceneBuilder& builder
     std::map<std::string, double> materialParams = parseMaterialProperties(sphere);
     
     auto material = MaterialFactory::createMaterial("flat", color, materialParams);
-    materials.push_back(material);
+    materials.push_back(material); // Store material to keep it alive
     
     auto sphereObj = std::make_unique<Sphere>(
         Math::Point3D(x, y, z), radius, *material

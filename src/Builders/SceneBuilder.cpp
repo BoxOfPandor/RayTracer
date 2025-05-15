@@ -43,11 +43,13 @@ std::unique_ptr<Scene> SceneBuilder::build()
 {
     auto scene = std::make_unique<Scene>(_camera, _width, _height);
     
+    // Add all primitives
     for (auto& primitive : _primitives) {
         scene->addPrimitive(std::move(primitive));
     }
     _primitives.clear();
     
+    // Add all lights
     for (auto& light : _lights) {
         scene->addLight(std::move(light));
     }

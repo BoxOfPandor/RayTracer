@@ -82,7 +82,7 @@ Vector3D Scene::traceRay(const Ray& ray, int depth) const
 
     Intersection intersection;
     if (!findClosestIntersection(ray, intersection)) {
-        return Vector3D(0.05, 0.05, 0.1);
+        return Vector3D(0.05, 0.05, 0.1); // Background color
     }
 
     const IMaterial& material = intersection.getPrimitive()->getMaterial();
