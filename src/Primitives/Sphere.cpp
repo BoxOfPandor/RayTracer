@@ -41,6 +41,53 @@ bool Sphere::getIntersection(const Ray& ray) const
 
     if (t1 > 0.001 || t2 > 0.001)
         return true;
-    
+
     return false;
+}
+
+Vector3D Sphere::getNormalAt(const Point3D& point) const
+{
+    Vector3D normal(
+        point.getX() - _origin.getX(),
+        point.getY() - _origin.getY(),
+        point.getZ() - _origin.getZ()
+    );
+
+    double length = normal.length();
+    if (length > 0) {
+        return normal / length;
+    }
+
+    return Vector3D(1, 0, 0);
+}
+
+void Sphere::translate(const Vector3D& translation)
+{
+    _origin = _origin + translation;
+}
+
+void Sphere::rotateX(double angle)
+{
+    // Rotation around the X-axis is not implemented for Sphere
+    // as it is a symmetrical object. This function can be left empty.
+    (void)angle;
+}
+
+void Sphere::rotateY(double angle)
+{
+    // Rotation around the X-axis is not implemented for Sphere
+    // as it is a symmetrical object. This function can be left empty.
+    (void)angle;
+}
+
+void Sphere::rotateZ(double angle)
+{
+    // Rotation around the X-axis is not implemented for Sphere
+    // as it is a symmetrical object. This function can be left empty.
+    (void)angle;
+}
+
+const IMaterial& Sphere::getMaterial() const
+{
+    return _material;
 }

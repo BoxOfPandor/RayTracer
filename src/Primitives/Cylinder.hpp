@@ -104,11 +104,11 @@ namespace RayTracer {
         const IMaterial& getMaterial() const override;
 
     private:
-        Math::Point3D _origin;     /**< Center of the base */
-        Math::Vector3D _direction; /**< Direction/axis of the cylinder (normalized) */
-        double _radius;            /**< Radius of the cylinder */
-        double _height;            /**< Height of the cylinder */
-        const IMaterial& _material; /**< Material properties of the cylinder */
+        Math::Point3D _origin;
+        Math::Vector3D _direction;
+        double _radius;
+        double _height;
+        const IMaterial& _material;
     };
 } // namespace RayTracer
 

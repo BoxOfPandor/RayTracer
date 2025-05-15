@@ -40,4 +40,5 @@ cmake-build-debug
 build
 *.ppm
 *.png
+*.cfg
 raytracer
