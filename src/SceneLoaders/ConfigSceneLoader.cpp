@@ -133,6 +133,13 @@ void ConfigSceneLoader::parseLights(const Setting& lightsSettings, SceneBuilder&
         }
     }
     
+    if (lightsSettings.exists("ambient_light")) {
+        const Setting& ambientLights = lightsSettings["ambient_light"];
+        for (int i = 0; i < ambientLights.getLength(); ++i) {
+            parseAmbientLight(ambientLights[i], builder);
+        }
+    }
+    
     if (lightsSettings.exists("point")) {
         std::cout << "Point lights found but not implemented yet" << std::endl;
     }
@@ -225,6 +232,27 @@ void ConfigSceneLoader::parseDirectionalLight(const Setting& light, SceneBuilder
         builder.addLight(std::move(dirLight));
     } catch (const std::exception& e) {
         std::cerr << "Error creating directional light: " << e.what() << std::endl;
+        throw;
+    }
+}
+
+void ConfigSceneLoader::parseAmbientLight(const libconfig::Setting& light, SceneBuilder& builder) const
+{
+    std::map<std::string, double> params;
+    double intensity = 1.0;
+    
+    if (light.exists("intensity")) {
+        light.lookupValue("intensity", intensity);
+        params["intensity"] = intensity;
+    }
+    
+    Vector3D color = parseColor(light);
+    
+    try {
+        auto ambientLight = LightFactory::createLight("ambient", params, color);
+        builder.addLight(std::move(ambientLight));
+    } catch (const std::exception& e) {
+        std::cerr << "Error creating ambient light: " << e.what() << std::endl;
         throw;
     }
 }
