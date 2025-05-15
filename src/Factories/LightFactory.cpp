@@ -20,7 +20,6 @@ std::unique_ptr<ILight> LightFactory::createLight(
     const Math::Vector3D& color)
 {
     if (type == "directional") {
-        // Extract direction parameters
         double x = params.count("x") ? params.at("x") : 0.0;
         double y = params.count("y") ? params.at("y") : -1.0;
         double z = params.count("z") ? params.at("z") : 0.0;
@@ -29,7 +28,6 @@ std::unique_ptr<ILight> LightFactory::createLight(
         Vector3D direction(x, y, z);
         return std::make_unique<DirectionalLight>(direction, color, intensity);
     }
-    // Add other light types here
 
     throw std::runtime_error("Unknown light type: " + type);
 }

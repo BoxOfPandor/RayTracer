@@ -19,7 +19,6 @@ std::unique_ptr<IPrimitive> PrimitiveFactory::createPrimitive(
     const IMaterial& material)
 {
     if (type == "sphere") {
-        // Extract sphere parameters
         double x = params.count("x") ? params.at("x") : 0.0;
         double y = params.count("y") ? params.at("y") : 0.0;
         double z = params.count("z") ? params.at("z") : 0.0;
@@ -29,7 +28,6 @@ std::unique_ptr<IPrimitive> PrimitiveFactory::createPrimitive(
         return std::make_unique<Sphere>(center, radius, material);
     }
     else if (type == "cylinder") {
-        // Extract cylinder parameters
         double x = params.count("x") ? params.at("x") : 0.0;
         double y = params.count("y") ? params.at("y") : 0.0;
         double z = params.count("z") ? params.at("z") : 0.0;
@@ -46,7 +44,6 @@ std::unique_ptr<IPrimitive> PrimitiveFactory::createPrimitive(
 
         return std::make_unique<Cylinder>(origin, direction, radius, height, material);
     }
-    // Add additional primitive types here as needed
 
     throw std::runtime_error("Unknown primitive type: " + type);
 }

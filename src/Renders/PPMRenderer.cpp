@@ -23,8 +23,7 @@ bool PPMRenderer::render(const Scene& scene, const std::string& outputFile) cons
 
     int width = scene.getWidth();
     int height = scene.getHeight();
-
-    // PPM header
+    
     file << "P3\n" << width << " " << height << "\n255\n";
 
     for (int j = height - 1; j >= 0; --j) {
