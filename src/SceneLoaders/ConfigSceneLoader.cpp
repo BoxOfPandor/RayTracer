@@ -114,6 +114,13 @@ void ConfigSceneLoader::parsePrimitives(const Setting& primitivesSettings, Scene
             parseCylinder(cylinders[i], builder, materials);
         }
     }
+    
+    if (primitivesSettings.exists("planes")) {
+        const Setting& planes = primitivesSettings["planes"];
+        for (int i = 0; i < planes.getLength(); ++i) {
+            parsePlane(planes[i], builder, materials);
+        }
+    }
 }
 
 void ConfigSceneLoader::parseLights(const Setting& lightsSettings, SceneBuilder& builder) const
@@ -143,6 +150,40 @@ void ConfigSceneLoader::parseLights(const Setting& lightsSettings, SceneBuilder&
     if (lightsSettings.exists("point")) {
         std::cout << "Point lights found but not implemented yet" << std::endl;
     }
+}
+
+void ConfigSceneLoader::parsePlane(const Setting& plane, SceneBuilder& builder,
+                                 std::vector<std::shared_ptr<IMaterial>>& materials) const
+{
+    double x = 0.0, y = 0.0, z = 0.0;
+    if (plane.exists("x")) plane.lookupValue("x", x);
+    if (plane.exists("y")) plane.lookupValue("y", y);
+    if (plane.exists("z")) plane.lookupValue("z", z);
+    
+    double normalX = 0.0, normalY = 1.0, normalZ = 0.0;
+    if (plane.exists("normal")) {
+        const Setting& normal = plane["normal"];
+        if (normal.exists("x")) normal.lookupValue("x", normalX);
+        if (normal.exists("y")) normal.lookupValue("y", normalY);
+        if (normal.exists("z")) normal.lookupValue("z", normalZ);
+    }
+    
+    Vector3D color = parseColor(plane);
+    std::map<std::string, double> materialParams = parseMaterialProperties(plane);
+    
+    auto material = MaterialFactory::createMaterial("flat", color, materialParams);
+    materials.push_back(material);
+    
+    std::map<std::string, double> params;
+    params["x"] = x;
+    params["y"] = y;
+    params["z"] = z;
+    params["normalX"] = normalX;
+    params["normalY"] = normalY;
+    params["normalZ"] = normalZ;
+    
+    auto planeObj = PrimitiveFactory::createPrimitive("plane", params, *material);
+    builder.addPrimitive(std::move(planeObj));
 }
 
 void ConfigSceneLoader::parseSphere(const Setting& sphere, SceneBuilder& builder, 
