@@ -32,81 +32,117 @@ void printUsage(const char* programName)
     std::cout << "If scene_file is provided, loads the scene from that file" << std::endl;
 }
 
+void parseCommandLine(int argc, char* argv[], bool& useSFML, std::string& outputFile,
+                     int& numThreads, std::string& sceneFile, bool& useSceneFile)
+{
+    useSFML = false;
+    outputFile = "output.ppm";
+    numThreads = 0;
+    sceneFile = "default_scene.cfg";
+    useSceneFile = false;
+
+    for (int i = 1; i < argc; ++i) {
+        if (strcmp(argv[i], "--ppm") == 0 && i + 1 < argc) {
+            useSFML = false;
+            outputFile = argv[++i];
+        }
+        else if (strcmp(argv[i], "--sfml") == 0 && i + 1 < argc) {
+            useSFML = true;
+            outputFile = argv[++i];
+        }
+        else if (strcmp(argv[i], "--threads") == 0 && i + 1 < argc) {
+            numThreads = std::stoi(argv[++i]);
+        }
+        else if (strcmp(argv[i], "--help") == 0) {
+            printUsage(argv[0]);
+            exit(0);
+        }
+        else if (argv[i][0] != '-') {
+            sceneFile = argv[i];
+            useSceneFile = true;
+        }
+        else {
+            std::cerr << "Unknown argument: " << argv[i] << std::endl;
+            printUsage(argv[0]);
+            exit(1);
+        }
+    }
+}
+
+std::unique_ptr<Scene> loadSceneFromFile(const std::string& sceneFile)
+{
+    std::cout << "Loading scene from file: " << sceneFile << std::endl;
+    ConfigSceneLoader sceneLoader;
+    try {
+        auto scene = sceneLoader.loadScene(sceneFile);
+        std::cout << "Scene loaded successfully" << std::endl;
+        return scene;
+    } catch (const std::exception& e) {
+        std::cerr << "Error loading scene: " << e.what() << std::endl;
+        throw;
+    }
+}
+
+bool renderScene(Scene& scene, bool useSFML, const std::string& outputFile, int numThreads)
+{
+    if (useSFML) {
+        std::cout << "Rendering with SFML renderer..." << std::endl;
+        SFMLRenderer renderer(numThreads);
+        if (!renderer.render(scene, outputFile)) {
+            std::cerr << "Failed to render the scene with SFML" << std::endl;
+            return false;
+        }
+    } else {
+        std::cout << "Rendering with PPM renderer..." << std::endl;
+        PPMRenderer renderer;
+        if (!renderer.render(scene, outputFile)) {
+            std::cerr << "Failed to render the scene to PPM" << std::endl;
+            return false;
+        }
+    }
+
+    std::cout << "Scene rendered successfully to " << outputFile << std::endl;
+    return true;
+}
+
 int main(int argc, char* argv[])
 {
+    bool useSFML;
+    std::string outputFile;
+    int numThreads;
+    std::string sceneFile;
+    bool useSceneFile;
+
     try {
-        bool useSFML = false;
-        std::string outputFile = "output.ppm";
-        int numThreads = 0;
-        std::string sceneFile = "default_scene.cfg";
-        bool useSceneFile = false;
+        parseCommandLine(argc, argv, useSFML, outputFile, numThreads, sceneFile, useSceneFile);
+    } catch (const std::exception& e) {
+        std::cerr << "Error parsing command line arguments: " << e.what() << std::endl;
+        return 1;
+    }
 
-        for (int i = 1; i < argc; ++i) {
-            if (strcmp(argv[i], "--ppm") == 0 && i + 1 < argc) {
-                useSFML = false;
-                outputFile = argv[++i];
-            }
-            else if (strcmp(argv[i], "--sfml") == 0 && i + 1 < argc) {
-                useSFML = true;
-                outputFile = argv[++i];
-            }
-            else if (strcmp(argv[i], "--threads") == 0 && i + 1 < argc) {
-                numThreads = std::stoi(argv[++i]);
-            }
-            else if (strcmp(argv[i], "--help") == 0) {
-                printUsage(argv[0]);
-                return 0;
-            }
-            else if (argv[i][0] != '-') {
-                sceneFile = argv[i];
-                useSceneFile = true;
-            }
-            else {
-                std::cerr << "Unknown argument: " << argv[i] << std::endl;
-                printUsage(argv[0]);
-                return 1;
-            }
-        }
-
-        std::unique_ptr<Scene> scene;
-
+    // Load scene
+    std::unique_ptr<Scene> scene;
+    try {
         if (useSceneFile) {
-            std::cout << "Loading scene from file: " << sceneFile << std::endl;
-            ConfigSceneLoader sceneLoader;
-            try {
-                scene = sceneLoader.loadScene(sceneFile);
-                std::cout << "Scene loaded successfully" << std::endl;
-            } catch (const std::exception& e) {
-                std::cerr << "Error loading scene: " << e.what() << std::endl;
-                return 1;
-            }
+            scene = loadSceneFromFile(sceneFile);
         } else {
             std::cerr << "Need a config scene file" << std::endl;
             return 84;
         }
-
-        if (useSFML) {
-            std::cout << "Rendering with SFML renderer..." << std::endl;
-            SFMLRenderer renderer(numThreads);
-            if (!renderer.render(*scene, outputFile)) {
-                std::cerr << "Failed to render the scene with SFML" << std::endl;
-                return 1;
-            }
-            std::cout << "Scene rendered successfully to " << outputFile << std::endl;
-        } else {
-            std::cout << "Rendering with PPM renderer..." << std::endl;
-            PPMRenderer renderer;
-            if (!renderer.render(*scene, outputFile)) {
-                std::cerr << "Failed to render the scene to PPM" << std::endl;
-                return 1;
-            }
-            std::cout << "Scene rendered successfully to " << outputFile << std::endl;
-        }
-
-        return 0;
-    }
-    catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
+    } catch (const std::exception& e) {
+        std::cerr << "Error loading scene: " << e.what() << std::endl;
         return 1;
     }
+
+    // Render scene
+    try {
+        if (!renderScene(*scene, useSFML, outputFile, numThreads)) {
+            return 1;
+        }
+    } catch (const std::exception& e) {
+        std::cerr << "Error during rendering: " << e.what() << std::endl;
+        return 1;
+    }
+
+    return 0;
 }
