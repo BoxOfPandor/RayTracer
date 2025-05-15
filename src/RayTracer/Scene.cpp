@@ -63,10 +63,10 @@ bool Scene::findClosestIntersection(const Ray& ray, Intersection& result) const
         double t;
         if (primitive->getIntersection(ray) && t < closestT) {
             closestT = t;
-            result.primitive = primitive.get();
-            result.distance = t;
-            result.point = ray.at(t);
-            result.normal = primitive->getNormalAt(result.point);
+            result.setPrimitive(primitive.get());
+            result.setDistance(t);
+            result.setPoint(ray.at(t));
+            result.setNormal(primitive->getNormalAt(ray.at(t)));
             found = true;
         }
     }
@@ -85,19 +85,20 @@ Vector3D Scene::traceRay(const Ray& ray, int depth) const
         return Vector3D(0.05, 0.05, 0.1); // Background color
     }
 
-    const IMaterial& material = intersection.primitive->getMaterial();
-    Vector3D materialColor = material.getColor();
+    const IMaterial& material = intersection.getPrimitive()->getMaterial();
+    Vector3D materialColor = material.getColor(intersection.getPoint());
+
     Vector3D ambientComponent = materialColor * material.getAmbient();
     Vector3D finalColor = ambientComponent;
 
     for (const auto& light : _lights) {
-        if (light->isShadowed(intersection.point, *this)) {
+        if (light->isShadowed(intersection.getPoint(), *this)) {
             continue;
         }
-        Vector3D lightDir = light->getDirection();
+        Vector3D lightDir = light->getDirection(intersection.getPoint());
         Vector3D lightColor = light->getColor();
-        double lightIntensity = light->getIntensity();
-        double diffuseFactor = std::max(0.0, Vector3D::dot(intersection.normal, lightDir * -1));
+        double lightIntensity = light->getIntensity(intersection.getPoint());
+        double diffuseFactor = std::max(0.0, Vector3D::dot(intersection.getNormal(), lightDir * -1));
 
         if (diffuseFactor > 0) {
             Vector3D diffuseComponent = materialColor * lightColor * diffuseFactor * material.getDiffuse() * lightIntensity;
@@ -108,7 +109,7 @@ Vector3D Scene::traceRay(const Ray& ray, int depth) const
             if (halfwayLength > 0.0001) {
                 halfwayDir = halfwayDir / halfwayLength;
                 double specularFactor = std::pow(
-                    std::max(0.0, Vector3D::dot(intersection.normal, halfwayDir)),
+                    std::max(0.0, Vector3D::dot(intersection.getNormal(), halfwayDir)),
                     material.getShininess()
                 );
                 Vector3D specularComponent = lightColor * specularFactor * material.getSpecular() * lightIntensity;

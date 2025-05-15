@@ -7,6 +7,7 @@
 
 #include "LightFactory.hpp"
 #include "DirectionalLight.hpp"
+#include "AmbientLight.hpp"
 
 #include <stdexcept>
 #include <map>
@@ -27,6 +28,10 @@ std::unique_ptr<ILight> LightFactory::createLight(
 
         Vector3D direction(x, y, z);
         return std::make_unique<DirectionalLight>(direction, color, intensity);
+    }
+    else if (type == "ambient") {
+        double intensity = params.count("intensity") ? params.at("intensity") : 1.0;
+        return std::make_unique<AmbientLight>(color, intensity);
     }
 
     throw std::runtime_error("Unknown light type: " + type);

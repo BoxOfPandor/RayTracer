@@ -15,6 +15,7 @@
 #include "ILight.hpp"
 #include "IMaterial.hpp"
 #include "FlatMaterial.hpp"
+#include "Intersection.hpp"
 
 namespace RayTracer {
     class Scene {
@@ -39,13 +40,6 @@ namespace RayTracer {
         int _height;
         std::vector<std::unique_ptr<IPrimitive>> _primitives;
         std::vector<std::unique_ptr<ILight>> _lights;
-
-        struct Intersection {
-            const IPrimitive* primitive;
-            double distance;
-            Math::Point3D point;
-            Math::Vector3D normal;
-        };
 
         bool findClosestIntersection(const Ray& ray, Intersection& result) const;
     };

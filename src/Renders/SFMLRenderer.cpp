@@ -25,17 +25,18 @@ SFMLRenderer::SFMLRenderer(int numThreads) : _numThreads(numThreads)
     }
 }
 
-std::vector<SFMLRenderer::Tile> SFMLRenderer::createTiles(int width, int height, int tileSize) const
+std::vector<Tile> SFMLRenderer::createTiles(int width, int height, int tileSize) const
 {
     std::vector<Tile> tiles;
 
     for (int y = 0; y < height; y += tileSize) {
         for (int x = 0; x < width; x += tileSize) {
-            Tile tile;
-            tile.startX = x;
-            tile.startY = y;
-            tile.endX = std::min(x + tileSize, width);
-            tile.endY = std::min(y + tileSize, height);
+            Tile tile(
+                x,
+                y,
+                std::min(x + tileSize, width),
+                std::min(y + tileSize, height)
+            );
             tiles.push_back(tile);
         }
     }
@@ -51,8 +52,8 @@ void SFMLRenderer::renderTile(const Scene& scene, sf::Image& image, const Tile& 
     const int width = scene.getWidth();
     const int height = scene.getHeight();
 
-    for (int y = tile.startY; y < tile.endY; ++y) {
-        for (int x = tile.startX; x < tile.endX; ++x) {
+    for (int y = tile.getStartY(); y < tile.getEndY(); ++y) {
+        for (int x = tile.getStartX(); x < tile.getEndX(); ++x) {
             double u = static_cast<double>(x) / (width - 1);
             double v = static_cast<double>(y) / (height - 1);
 
