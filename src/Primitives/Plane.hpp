@@ -5,19 +5,25 @@
 ** Sphere
 */
 
-#include "APrimitive.hpp"
+#include "IPrimitive.hpp"
 
 #ifndef PLANE_HPP
     #define PLANE_HPP
 
 namespace RayTracer {
-    class Plane : public APrimitive {
+    class Plane : public IPrimitive {
         public:
             Plane(const Math::Point3D& origin, const Math::Point3D& size, const IMaterial& material);
             ~Plane();
 
+            bool hits(const Ray& ray) const;
             Math::Vector3D getNormalAt(const Math::Point3D& point) const;
             bool getIntersection(const Ray &ray) const;
+            void translate(const Math::Vector3D& translation);
+            void rotateX(double angle);
+            void rotateY(double angle);
+            void rotateZ(double angle);
+            const IMaterial& getMaterial() const;
 
         private:
             Math::Point3D _origin;

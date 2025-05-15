@@ -11,11 +11,16 @@ using namespace RayTracer;
 using namespace Math;
 
 Plane::Plane(const Math::Point3D& origin, const Math::Point3D& size, const IMaterial& material)
-    : APrimitive(origin, material), _origin(origin), _size(size), _material(material)
+    : _origin(origin), _size(size), _material(material)
 {}
 
 Plane::~Plane()
 {}
+
+bool Plane::hits(const Ray& ray) const
+{
+    return getIntersection(ray);
+}
 
 bool Plane::getIntersection(const Ray &ray) const
 {
@@ -31,4 +36,34 @@ bool Plane::getIntersection(const Ray &ray) const
         return true;
 
     return false;
+}
+
+Vector3D Plane::getNormalAt(const Point3D& point) const
+{
+    return Vector3D(0, 0, 0);
+}
+
+void Plane::translate(const Math::Vector3D& translation)
+{
+    _origin = _origin + translation;
+}
+
+void Plane::rotateX(double angle)
+{
+    (void)angle;
+}
+
+void Plane::rotateY(double angle)
+{
+    (void)angle;
+}
+
+void Plane::rotateZ(double angle)
+{
+    (void)angle;
+}
+
+const IMaterial& Plane::getMaterial() const
+{
+    return _material;
 }

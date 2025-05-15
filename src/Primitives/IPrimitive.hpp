@@ -5,15 +5,16 @@
 ** IPrimitive.hpp
 */
 
+#ifndef IPRIMITIVE_HPP
+#define IPRIMITIVE_HPP
+
 #include "Vector3D.hpp"
 #include "Point3D.hpp"
 #include "Ray.hpp"
-#include "IMaterial.hpp"
-
-#ifndef IPRIMITIVE_HPP
-    #define IPRIMITIVE_HPP
 
 namespace RayTracer {
+    class IMaterial;
+
     class IPrimitive {
     public:
         virtual ~IPrimitive() = default;
@@ -50,19 +51,19 @@ namespace RayTracer {
          * @brief Apply rotation transformation to the primitive around X axis
          * @param angle Rotation angle in degrees
          */
-        // virtual void rotateX(double angle) = 0;
+        virtual void rotateX(double angle) = 0;
 
         /**
          * @brief Apply rotation transformation to the primitive around Y axis
          * @param angle Rotation angle in degrees
          */
-        // virtual void rotateY(double angle) = 0;
+        virtual void rotateY(double angle) = 0;
 
         /**
          * @brief Apply rotation transformation to the primitive around Z axis
          * @param angle Rotation angle in degrees
          */
-        // virtual void rotateZ(double angle) = 0;
+        virtual void rotateZ(double angle) = 0;
 
         /**
          * @brief Get the material of the primitive

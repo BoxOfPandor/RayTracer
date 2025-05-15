@@ -5,23 +5,36 @@
 ** Sphere
 */
 
-#include "APrimitive.hpp"
-
 #ifndef SPHERE_HPP
-    #define SPHERE_HPP
+#define SPHERE_HPP
+
+#include "IPrimitive.hpp"
+#include "Point3D.hpp"
+#include "Vector3D.hpp"
+#include "Ray.hpp"
+#include "IMaterial.hpp"
 
 namespace RayTracer {
-    class Sphere : public APrimitive {
-        public:
-            Sphere(const Math::Point3D& origin, double radius, const IMaterial& material);
-            ~Sphere();
+    class Material;
+    
+    class Sphere : public IPrimitive {
+    public:
+        Sphere(const Math::Point3D& origin, double radius, const IMaterial& material);
+        ~Sphere() = default;
 
-            bool getIntersection(const Ray& ray) const;
+        bool hits(const Ray& ray) const override;
+        bool getIntersection(const Ray& ray) const override;
+        Math::Vector3D getNormalAt(const Math::Point3D& point) const override;
+        void translate(const Math::Vector3D& translation) override;
+        void rotateX(double angle) override;
+        void rotateY(double angle) override;
+        void rotateZ(double angle) override;
+        const IMaterial& getMaterial() const override;
 
-        private:
-            Math::Point3D _origin;
-            double _radius;
-            const IMaterial& _material;
+    private:
+        Math::Point3D _origin;
+        double _radius;
+        const IMaterial& _material;
     };
 }
 

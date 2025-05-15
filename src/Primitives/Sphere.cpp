@@ -12,23 +12,26 @@ using namespace RayTracer;
 using namespace Math;
 
 Sphere::Sphere(const Math::Point3D& origin, double radius, const IMaterial& material)
-    : APrimitive(origin, material), _origin(origin), _radius(radius), _material(material)
-{}
+    : _origin(origin), _radius(radius), _material(material)
+{
+}
 
-Sphere::~Sphere()
-{}
+bool Sphere::hits(const Ray& ray) const
+{
+    return getIntersection(ray);
+}
 
 bool Sphere::getIntersection(const Ray& ray) const
 {
-    Vector3D originToAPrimitive(
+    Vector3D originToSphere(
         ray.getOrigin().getX() - _origin.getX(),
         ray.getOrigin().getY() - _origin.getY(),
         ray.getOrigin().getZ() - _origin.getZ()
     );
 
     double a = Vector3D::dot(ray.getDirection(), ray.getDirection());
-    double b = 2.0 * Vector3D::dot(ray.getDirection(), originToAPrimitive);
-    double c = Vector3D::dot(originToAPrimitive, originToAPrimitive) - _radius * _radius;
+    double b = 2.0 * Vector3D::dot(ray.getDirection(), originToSphere);
+    double c = Vector3D::dot(originToSphere, originToSphere) - _radius * _radius;
 
     double discriminant = (b * b) - 4 * a * c;
 
