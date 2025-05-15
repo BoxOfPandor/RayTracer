@@ -32,7 +32,7 @@ namespace RayTracer {
          * @param t Output parameter that will contain the distance from ray origin
          * @return true if there is an intersection, false otherwise
          */
-        virtual bool getIntersection(const Ray& ray, double& t) const = 0;
+        virtual bool getIntersection(const Ray& ray) const = 0;
 
         /**
          * @brief Get the normal vector at an intersection point
@@ -71,6 +71,6 @@ namespace RayTracer {
          */
         virtual const IMaterial& getMaterial() const = 0;
     };
-} // namespace RayTracer
+}
 
-#endif // IPRIMITIVE_HPP
+#endif

@@ -18,11 +18,10 @@ Sphere::Sphere(const Math::Point3D& origin, double radius, const IMaterial& mate
 
 bool Sphere::hits(const Ray& ray) const
 {
-    double t;
-    return getIntersection(ray, t);
+    return getIntersection(ray);
 }
 
-bool Sphere::getIntersection(const Ray& ray, double& t) const
+bool Sphere::getIntersection(const Ray& ray) const
 {
     Vector3D originToSphere(
         ray.getOrigin().getX() - _origin.getX(),
@@ -36,22 +35,15 @@ bool Sphere::getIntersection(const Ray& ray, double& t) const
 
     double discriminant = (b * b) - 4 * a * c;
 
-    if (discriminant < 0) {
+    if (discriminant < 0)
         return false;
-    }
 
     double sqrtDiscriminant = std::sqrt(discriminant);
     double t1 = (-b - sqrtDiscriminant) / (2 * a);
     double t2 = (-b + sqrtDiscriminant) / (2 * a);
 
-    if (t1 > 0.001) {
-        t = t1;
+    if (t1 > 0.001 || t2 > 0.001)
         return true;
-    }
-    if (t2 > 0.001) {
-        t = t2;
-        return true;
-    }
 
     return false;
 }

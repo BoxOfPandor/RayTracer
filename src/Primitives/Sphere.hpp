@@ -23,7 +23,7 @@ namespace RayTracer {
         ~Sphere() = default;
 
         bool hits(const Ray& ray) const override;
-        bool getIntersection(const Ray& ray, double& t) const override;
+        bool getIntersection(const Ray& ray) const override;
         Math::Vector3D getNormalAt(const Math::Point3D& point) const override;
         void translate(const Math::Vector3D& translation) override;
         void rotateX(double angle) override;
@@ -36,6 +36,6 @@ namespace RayTracer {
         double _radius;
         const IMaterial& _material;
     };
-} // namespace RayTracer
+}
 
-#endif //SPHERE_HPP
+#endif

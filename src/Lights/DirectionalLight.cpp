@@ -24,19 +24,13 @@ DirectionalLight::DirectionalLight(const Vector3D& direction, const Vector3D& co
     }
 }
 
-Vector3D DirectionalLight::getDirection(const Point3D& point) const
+Vector3D DirectionalLight::getDirection() const
 {
-    // The direction of a directional light is constant and does not depend on the point
-    // But maintant interface consistency
-    (void)point;
     return _direction;
 }
 
-double DirectionalLight::getIntensity(const Point3D& point) const
+double DirectionalLight::getIntensity() const
 {
-    // The direction of a directional light is constant and does not depend on the point
-    // But maintant interface consistency
-    (void)point;
     return _intensity;
 }
 

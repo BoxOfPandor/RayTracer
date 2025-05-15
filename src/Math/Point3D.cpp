@@ -56,3 +56,8 @@ Point3D Point3D::operator-(Point3D other) const
 {
     return {this->_x - other.getX(), this->_y - other.getY(), this->_z - other.getZ()};
 }
+
+Point3D Point3D::operator*(double other) const
+{
+    return {this->_x * other, this->_y * other, this->_z * other};
+}

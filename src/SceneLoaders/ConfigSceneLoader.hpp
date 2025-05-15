@@ -40,6 +40,8 @@ namespace RayTracer {
                          std::vector<std::shared_ptr<IMaterial>>& materials) const;
         void parseCylinder(const libconfig::Setting& cylinder, SceneBuilder& builder,
                            std::vector<std::shared_ptr<IMaterial>>& materials) const;
+        void parsePlane(const libconfig::Setting& cylinder, SceneBuilder& builder,
+            std::vector<std::shared_ptr<IMaterial>>& materials) const;
         void parseDirectionalLight(const libconfig::Setting& light, SceneBuilder& builder) const;
         void parseAmbientLight(const libconfig::Setting& light, SceneBuilder& builder) const;
         Math::Vector3D parseColor(const libconfig::Setting& setting) const;
