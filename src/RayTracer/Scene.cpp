@@ -61,7 +61,7 @@ bool Scene::findClosestIntersection(const Ray& ray, Intersection& result) const
 
     for (const auto& primitive : _primitives) {
         double t;
-        if (primitive->getIntersection(ray, t) && t < closestT) {
+        if (primitive->getIntersection(ray) && t < closestT) {
             closestT = t;
             result.primitive = primitive.get();
             result.distance = t;
@@ -86,8 +86,7 @@ Vector3D Scene::traceRay(const Ray& ray, int depth) const
     }
 
     const IMaterial& material = intersection.primitive->getMaterial();
-    Vector3D materialColor = material.getColor(intersection.point);
-
+    Vector3D materialColor = material.getColor();
     Vector3D ambientComponent = materialColor * material.getAmbient();
     Vector3D finalColor = ambientComponent;
 
@@ -95,10 +94,9 @@ Vector3D Scene::traceRay(const Ray& ray, int depth) const
         if (light->isShadowed(intersection.point, *this)) {
             continue;
         }
-
-        Vector3D lightDir = light->getDirection(intersection.point);
+        Vector3D lightDir = light->getDirection();
         Vector3D lightColor = light->getColor();
-        double lightIntensity = light->getIntensity(intersection.point);
+        double lightIntensity = light->getIntensity();
         double diffuseFactor = std::max(0.0, Vector3D::dot(intersection.normal, lightDir * -1));
 
         if (diffuseFactor > 0) {

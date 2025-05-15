@@ -16,7 +16,7 @@ namespace RayTracer {
         FlatMaterial(const Math::Vector3D& color, double ambient = 0.1,
                     double diffuse = 0.7, double specular = 0.2, double shininess = 50);
 
-        Math::Vector3D getColor(const Math::Point3D& point) const override;
+        Math::Vector3D getColor() const override;
         double getAmbient() const override;
         double getDiffuse() const override;
         double getSpecular() const override;

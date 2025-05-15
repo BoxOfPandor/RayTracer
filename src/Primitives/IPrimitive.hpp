@@ -5,16 +5,15 @@
 ** IPrimitive.hpp
 */
 
-#ifndef IPRIMITIVE_HPP
-#define IPRIMITIVE_HPP
-
 #include "Vector3D.hpp"
 #include "Point3D.hpp"
 #include "Ray.hpp"
+#include "IMaterial.hpp"
+
+#ifndef IPRIMITIVE_HPP
+    #define IPRIMITIVE_HPP
 
 namespace RayTracer {
-    class IMaterial;
-
     class IPrimitive {
     public:
         virtual ~IPrimitive() = default;
@@ -32,7 +31,7 @@ namespace RayTracer {
          * @param t Output parameter that will contain the distance from ray origin
          * @return true if there is an intersection, false otherwise
          */
-        virtual bool getIntersection(const Ray& ray, double& t) const = 0;
+        virtual bool getIntersection(const Ray& ray) const = 0;
 
         /**
          * @brief Get the normal vector at an intersection point
@@ -51,19 +50,19 @@ namespace RayTracer {
          * @brief Apply rotation transformation to the primitive around X axis
          * @param angle Rotation angle in degrees
          */
-        virtual void rotateX(double angle) = 0;
+        // virtual void rotateX(double angle) = 0;
 
         /**
          * @brief Apply rotation transformation to the primitive around Y axis
          * @param angle Rotation angle in degrees
          */
-        virtual void rotateY(double angle) = 0;
+        // virtual void rotateY(double angle) = 0;
 
         /**
          * @brief Apply rotation transformation to the primitive around Z axis
          * @param angle Rotation angle in degrees
          */
-        virtual void rotateZ(double angle) = 0;
+        // virtual void rotateZ(double angle) = 0;
 
         /**
          * @brief Get the material of the primitive
@@ -71,6 +70,6 @@ namespace RayTracer {
          */
         virtual const IMaterial& getMaterial() const = 0;
     };
-} // namespace RayTracer
+}
 
-#endif // IPRIMITIVE_HPP
+#endif
