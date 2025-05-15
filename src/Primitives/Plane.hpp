@@ -16,6 +16,7 @@ namespace RayTracer {
             Plane(const Math::Point3D& origin, const Math::Point3D& size, const IMaterial& material);
             ~Plane();
 
+            Math::Vector3D getNormalAt(const Math::Point3D& point) const;
             bool getIntersection(const Ray &ray) const;
 
         private:
