@@ -47,21 +47,6 @@ double Vector3D::dot(const Vector3D& vec1, const Vector3D& vec2)
     return vec1.getX() * vec2.getX() + vec1.getY() * vec2.getY() + vec1.getZ() * vec2.getZ();
 }
 
-Vector3D Vector3D::normalize() const
-{
-    double len = std::sqrt(_x * _x + _y * _y + _z * _z);
-    return Vector3D(_x / len, _y / len, _z / len);
-}
-
-Vector3D Vector3D::cross(const Vector3D& v) const
-{
-    return {
-        _y * v.getZ() - _z * v.getY(),
-        _z * v.getX() - _x * v.getZ(),
-        _x * v.getY() - _y * v.getX()
-    };
-}
-
 Vector3D Vector3D::operator*(double n) const
 {
     return {this->_x * n, this->_y * n, this->_z * n};

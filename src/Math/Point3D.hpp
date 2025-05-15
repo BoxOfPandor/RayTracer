@@ -25,7 +25,6 @@ namespace Math {
         Point3D operator+(Point3D other) const;
         Point3D operator-(Vector3D other) const;
         Point3D operator-(Point3D other) const;
-        Point3D operator*(double other) const;
 
     private:
         double _x;

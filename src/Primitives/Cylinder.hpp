@@ -58,7 +58,7 @@ namespace RayTracer {
          * @return true If an intersection is found
          * @return false If no intersection is found
          */
-        bool getIntersection(const Ray& ray) const;
+        bool getIntersection(const Ray& ray, double& t) const override;
 
         /**
          * @brief Calculates the normal vector at a given point on the cylinder
@@ -80,21 +80,21 @@ namespace RayTracer {
          *
          * @param angle The rotation angle in degrees
          */
-        void rotateX(double angle);
+        void rotateX(double angle) override;
 
         /**
          * @brief Rotates the cylinder around the Y-axis
          *
          * @param angle The rotation angle in degrees
          */
-        void rotateY(double angle);
+        void rotateY(double angle) override;
 
         /**
          * @brief Rotates the cylinder around the Z-axis
          *
          * @param angle The rotation angle in degrees
          */
-        void rotateZ(double angle);
+        void rotateZ(double angle) override;
 
         /**
          * @brief Gets the material of the cylinder

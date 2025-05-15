@@ -9,7 +9,6 @@
 #include "Scene.hpp"
 #include "Camera.hpp"
 #include "Sphere.hpp"
-#include "Plane.hpp"
 #include "Cylinder.hpp"
 #include "FlatMaterial.hpp"
 #include "DirectionalLight.hpp"
@@ -115,13 +114,6 @@ void ConfigSceneLoader::parsePrimitives(const Setting& primitivesSettings, Scene
             parseCylinder(cylinders[i], builder, materials);
         }
     }
-
-    if (primitivesSettings.exists("plane")) {
-        const Setting& plane = primitivesSettings["plane"];
-        for (int i = 0; i < plane.getLength(); ++i) {
-            parsePlane(plane[i], builder, materials);
-        }
-    }
 }
 
 void ConfigSceneLoader::parseLights(const Setting& lightsSettings, SceneBuilder& builder) const
@@ -175,36 +167,6 @@ void ConfigSceneLoader::parseSphere(const Setting& sphere, SceneBuilder& builder
     );
     
     builder.addPrimitive(std::move(sphereObj));
-}
-
-void ConfigSceneLoader::parsePlane(const Setting& plane, SceneBuilder& builder,
-    std::vector<std::shared_ptr<IMaterial>>& materials) const
-{
-    double x = 0.0;
-    double y = 0.0;
-    double z = 0.0;
-    double xs = 0.0;
-    double ys = 0.0;
-    double zs = 0.0;
-
-    if (plane.exists("x")) plane.lookupValue("x", x);
-    if (plane.exists("y")) plane.lookupValue("y", y);
-    if (plane.exists("z")) plane.lookupValue("z", z);
-    if (plane.exists("xs")) plane.lookupValue("xs", xs);
-    if (plane.exists("ys")) plane.lookupValue("ys", ys);
-    if (plane.exists("zs")) plane.lookupValue("zs", zs);
-
-    Vector3D color = parseColor(plane);
-    std::map<std::string, double> materialParams = parseMaterialProperties(plane);
-
-    auto material = MaterialFactory::createMaterial("flat", color, materialParams);
-    materials.push_back(material);
-
-    auto planeObj = std::make_unique<Plane>(
-        Math::Point3D(x, y, z), Math::Vector3D(xs, ys, zs), *material
-    );
-
-    builder.addPrimitive(std::move(planeObj));
 }
 
 void ConfigSceneLoader::parseCylinder(const Setting& cylinder, SceneBuilder& builder,

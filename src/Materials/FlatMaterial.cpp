@@ -16,8 +16,9 @@ FlatMaterial::FlatMaterial(const Vector3D& color, double ambient,
 {
 }
 
-Vector3D FlatMaterial::getColor() const
+Vector3D FlatMaterial::getColor(const Point3D& point) const
 {
+    (void)point;
     return _color;
 }
 

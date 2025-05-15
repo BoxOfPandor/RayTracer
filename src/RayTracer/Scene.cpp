@@ -61,7 +61,7 @@ bool Scene::findClosestIntersection(const Ray& ray, Intersection& result) const
 
     for (const auto& primitive : _primitives) {
         double t;
-        if (primitive->getIntersection(ray) && t < closestT) {
+        if (primitive->getIntersection(ray, t) && t < closestT) {
             closestT = t;
             result.setPrimitive(primitive.get());
             result.setDistance(t);
@@ -95,6 +95,7 @@ Vector3D Scene::traceRay(const Ray& ray, int depth) const
         if (light->isShadowed(intersection.getPoint(), *this)) {
             continue;
         }
+
         Vector3D lightDir = light->getDirection(intersection.getPoint());
         Vector3D lightColor = light->getColor();
         double lightIntensity = light->getIntensity(intersection.getPoint());

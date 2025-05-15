@@ -22,7 +22,7 @@ namespace RayTracer {
          * @param point The point to get the color at
          * @return The color as a Vector3D (R, G, B)
          */
-        virtual Math::Vector3D getColor() const = 0;
+        virtual Math::Vector3D getColor(const Math::Point3D& point) const = 0;
 
         /**
          * @brief Get the ambient reflection coefficient

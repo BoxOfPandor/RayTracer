@@ -26,10 +26,11 @@ Cylinder::Cylinder(const Math::Point3D& origin, const Math::Vector3D& direction,
 
 bool Cylinder::hits(const Ray& ray) const
 {
-    return getIntersection(ray);
+    double t;
+    return getIntersection(ray, t);
 }
 
-bool Cylinder::getIntersection(const Ray& ray) const
+bool Cylinder::getIntersection(const Ray& ray, double& t) const
 {
     const Vector3D& rayDir = ray.getDirection();
     const Point3D& rayOrigin = ray.getOrigin();
@@ -99,6 +100,7 @@ bool Cylinder::getIntersection(const Ray& ray) const
         }
     }
 
+    t = t_hit;
     return true;
 }
 

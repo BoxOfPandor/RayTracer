@@ -24,14 +24,14 @@ namespace RayTracer {
          * @param point The point to get the direction from
          * @return The direction vector of the light
          */
-        virtual Math::Vector3D getDirection() const = 0;
+        virtual Math::Vector3D getDirection(const Math::Point3D& point) const = 0;
 
         /**
          * @brief Get the intensity of the light at a given point
          * @param point The point to get the intensity at
          * @return The intensity of the light (between 0 and 1)
          */
-        virtual double getIntensity() const = 0;
+        virtual double getIntensity(const Math::Point3D& point) const = 0;
 
         /**
          * @brief Get the color of the light
