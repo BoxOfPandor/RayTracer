@@ -17,6 +17,7 @@
 #include <locale>
 #include <codecvt>
 #include "IRenderer.hpp"
+#include "Tile.hpp"
 #include <SFML/Graphics.hpp>
 
 namespace RayTracer {
@@ -42,13 +43,6 @@ namespace RayTracer {
         bool render(const Scene& scene, const std::string& outputFile) const override;
 
     private:
-        struct Tile {
-            int startX;
-            int startY;
-            int endX;
-            int endY;
-        };
-
         /**
          * @brief Render a specific tile of the image
          * @param scene The scene to render
