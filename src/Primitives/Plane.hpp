@@ -13,7 +13,7 @@
 namespace RayTracer {
     class Plane : public IPrimitive {
         public:
-            Plane(const Math::Point3D& origin, const Math::Point3D& size, const IMaterial& material);
+            Plane(const Math::Point3D& origin, const Math::Vector3D& size, const IMaterial& material);
             ~Plane();
 
             bool hits(const Ray& ray) const;
@@ -27,7 +27,7 @@ namespace RayTracer {
 
         private:
             Math::Point3D _origin;
-            Math::Point3D _size;
+            Math::Vector3D _size;
             const IMaterial& _material;
     };
 }

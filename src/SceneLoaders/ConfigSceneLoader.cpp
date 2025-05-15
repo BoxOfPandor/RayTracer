@@ -194,7 +194,7 @@ void ConfigSceneLoader::parsePlane(const Setting& plane, SceneBuilder& builder,
     materials.push_back(material);
 
     auto planeObj = std::make_unique<Plane>(
-        Math::Point3D(x, y, z), Math::Point3D(xs, ys, zs), *material
+        Math::Point3D(x, y, z), Math::Vector3D(xs, ys, zs), *material
     );
 
     builder.addPrimitive(std::move(planeObj));
