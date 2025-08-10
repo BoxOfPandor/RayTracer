@@ -15,6 +15,7 @@
 #include <iostream>
 #include <optional>
 #include <vector>
+#include <filesystem>
 
 // raylib C header
 extern "C" {
@@ -94,11 +95,32 @@ void RaylibRenderer::saveToFile(const std::vector<std::uint8_t>& pixels,
                                 int height,
                                 const std::string& outputFile) const
 {
+    namespace fs = std::filesystem;
+
+    // Build target path, ensure .png extension if none provided
+    fs::path outPath(outputFile);
+    if (!outPath.has_extension()) {
+        outPath.replace_extension(".png");
+    }
+
+    // Ensure parent directory exists (ExportImage fails if directory is missing)
+    std::error_code ec;
+    if (outPath.has_parent_path() && !outPath.parent_path().empty()) {
+        fs::create_directories(outPath.parent_path(), ec);
+        if (ec) {
+            std::cerr << "Warning: failed to create directories for '" << outPath.parent_path().string()
+                      << "': " << ec.message() << std::endl;
+        }
+    }
+
+    // Prepare raylib image wrapper around our RGBA buffer (top-left origin already handled)
     Image img = { const_cast<unsigned char*>(pixels.data()), width, height, 1, PIXELFORMAT_UNCOMPRESSED_R8G8B8A8 };
-    if (ExportImage(img, outputFile.c_str()) == false) {
-        std::cerr << "Failed to save image to " << outputFile << std::endl;
+
+    const std::string outStr = outPath.string();
+    if (!ExportImage(img, outStr.c_str())) {
+        std::cerr << "Failed to save image to '" << outStr << "'" << std::endl;
     } else {
-        std::cout << "Image successfully saved to " << outputFile << std::endl;
+        std::cout << "Image successfully saved to '" << outStr << "'" << std::endl;
     }
 }
 
