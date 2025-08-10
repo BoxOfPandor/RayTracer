@@ -46,31 +46,51 @@ OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 OBJ_DIRS := $(sort $(dir $(OBJS)))
 
 # Rules
-.PHONY: all clean fclean re dirs
 
-all: dirs $(NAME)
+# Colors
+GREEN = \033[0;32m
+RED = \033[0;31m
+YELLOW = \033[0;33m
+CYAN = \033[0;36m
+MAGENTA = \033[0;35m
+RESET = \033[0m
+
+.PHONY: all banner clean fclean re dirs
+
+all: banner dirs $(NAME)
+
+banner:
+	@printf "$(CYAN)=================================================================================$(RESET)\n"
+	@printf "\n"
+	@printf "$(MAGENTA)  ██████   █████  ██    ██     ████████ ██████   █████   ██████ ███████ ██████$(RESET)\n"
+	@printf "$(MAGENTA)  ██   ██ ██   ██  ██  ██         ██    ██   ██ ██   ██ ██      ██      ██   ██$(RESET)\n"
+	@printf "$(MAGENTA)  ██████  ███████   ████          ██    ██████  ███████ ██      █████   ██████$(RESET)\n"
+	@printf "$(MAGENTA)  ██   ██ ██   ██    ██           ██    ██   ██ ██   ██ ██      ██      ██   ██$(RESET)\n"
+	@printf "$(MAGENTA)  ██   ██ ██   ██    ██           ██    ██   ██ ██   ██  ██████ ███████ ██   ██$(RESET)\n"
+	@printf "\n"
+	@printf "$(CYAN)                          RayTracer build (Raylib edition)     $(RESET)\n"
+	@printf "\n"
+	@printf "$(CYAN)=================================================================================$(RESET)\n"
 
 dirs:
 	@for dir in $(OBJ_DIRS); do mkdir -p $$dir; done
 
 $(NAME): $(OBJS)
-	$(CXX) $(OBJS) -o $(NAME) $(LDFLAGS)
+	@printf "$(GREEN)Linking$(RESET) %s\n" "$(NAME)"
+	@$(CXX) $(OBJS) -o $(NAME) $(LDFLAGS)
+	@printf "$(GREEN)Build success:$(RESET) %s\n" "$(NAME)"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir -p $(dir $@)
-	$(CXX) $(CXXFLAGS) -c $< -o $@
+	@printf "$(YELLOW)Compiling$(RESET) %s\n" "$<"
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(OBJ_DIR)
+	@printf "$(RED)Cleaning object files...$(RESET)\n"
+	@rm -rf $(OBJ_DIR)
 
 fclean: clean
-	rm -f $(NAME) output.ppm output.png
+	@printf "$(RED)Cleaning binary and outputs...$(RESET)\n"
+	@rm -f $(NAME) output.ppm output.png
 
 re: fclean all
-	@echo "LIBCONFIG_PKGCONFIG=$(LIBCONFIG_PKGCONFIG)"
-	@echo "HOMEBREW_PREFIX=$(HOMEBREW_PREFIX)"
-	@echo "RAYLIB_CFLAGS=$(RAYLIB_CFLAGS)"
-	@echo "RAYLIB_LDFLAGS=$(RAYLIB_LDFLAGS)"
-	@echo "LIBCONFIG_CFLAGS=$(LIBCONFIG_CFLAGS)"
-	@echo "LIBCONFIG_LDFLAGS=$(LIBCONFIG_LDFLAGS)"
-	@echo "RPATH_FLAGS=$(RPATH_FLAGS)"
