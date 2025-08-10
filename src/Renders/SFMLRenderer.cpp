@@ -7,10 +7,13 @@
 
 #include "SFMLRenderer.hpp"
 #include "Scene.hpp"
+
 #include <iostream>
 #include <algorithm>
 #include <thread>
 #include <chrono>
+#include <cstdint>
+#include <optional>
 
 using namespace RayTracer;
 using namespace Math;
@@ -62,13 +65,12 @@ void SFMLRenderer::renderTile(const Scene& scene, sf::Image& image, const Tile& 
             Vector3D color = scene.traceRay(ray);
 
             sf::Color pixelColor(
-                static_cast<sf::Uint8>(std::min(255.0, std::max(0.0, color.getX() * 255.0))),
-                static_cast<sf::Uint8>(std::min(255.0, std::max(0.0, color.getY() * 255.0))),
-                static_cast<sf::Uint8>(std::min(255.0, std::max(0.0, color.getZ() * 255.0))),
+                static_cast<std::uint8_t>(std::min(255.0, std::max(0.0, color.getX() * 255.0))),
+                static_cast<std::uint8_t>(std::min(255.0, std::max(0.0, color.getY() * 255.0))),
+                static_cast<std::uint8_t>(std::min(255.0, std::max(0.0, color.getZ() * 255.0))),
                 255
             );
-
-            image.setPixel(x, height - 1 - y, pixelColor);
+            image.setPixel(sf::Vector2u(x, height - 1 - y), pixelColor);
         }
     }
 
@@ -77,13 +79,12 @@ void SFMLRenderer::renderTile(const Scene& scene, sf::Image& image, const Tile& 
 
 void SFMLRenderer::handleEvents(sf::RenderWindow& window) const
 {
-    sf::Event event;
-    while (window.pollEvent(event)) {
-        if (event.type == sf::Event::Closed) {
+    while (const std::optional<sf::Event> event = window.pollEvent()) {
+        if (event->is<sf::Event::Closed>()) {
             window.close();
         }
-        else if (event.type == sf::Event::KeyPressed) {
-            if (event.key.code == sf::Keyboard::Escape) {
+        else if (const auto* keyPressed = event->getIf<sf::Event::KeyPressed>()) {
+            if (keyPressed->code == sf::Keyboard::Key::Escape) {
                 window.close();
             }
         }
@@ -113,14 +114,21 @@ bool SFMLRenderer::render(const Scene& scene, const std::string& outputFile) con
     const int width = scene.getWidth();
     const int height = scene.getHeight();
 
-    sf::RenderWindow window(sf::VideoMode(width, height), "RayTracer Rendering");
+    sf::RenderWindow window(sf::VideoMode(sf::Vector2u(static_cast<unsigned int>(width), static_cast<unsigned int>(height))), "RayTracer Rendering");
     window.setFramerateLimit(30);
 
     sf::Image image;
-    image.create(width, height, sf::Color::Black);
-
+    image = sf::Image();
+    // Remplissage manuel de l'image en noir
+    for (int y = 0; y < height; ++y) {
+        for (int x = 0; x < width; ++x) {
+            image.setPixel(sf::Vector2u(x, y), sf::Color::Black);
+        }
+    }
     sf::Texture texture;
-    texture.create(width, height);
+    if (!texture.loadFromImage(image)) {
+        std::cerr << "Failed to initialize texture from image" << std::endl;
+    }
 
     std::vector<Tile> tiles = createTiles(width, height, TILE_SIZE);
     const int totalTiles = tiles.size();
