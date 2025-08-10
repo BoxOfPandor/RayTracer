@@ -1,71 +1,96 @@
 ##
+##
 ## EPITECH PROJECT, 2025
-## OOP
-## File description:
-## raytracer
+## raytracer (Raylib)
 ##
 
 NAME = raytracer
 CXX = g++
-CXXFLAGS = -std=c++17 -Wall -Wextra -pedantic
-SFML_LIBS = -lsfml-graphics -lsfml-window -lsfml-system
+UNAME_S := $(shell uname -s)
+UNAME_M := $(shell uname -m)
+
+# Includes
 SRC_DIR = src
 OBJ_DIR = obj
 INCLUDE_DIRS = -I$(SRC_DIR) \
-               -I$(SRC_DIR)/Math \
-               -I$(SRC_DIR)/RayTracer \
-               -I$(SRC_DIR)/Primitives \
-               -I$(SRC_DIR)/Materials \
-               -I$(SRC_DIR)/Lights \
-               -I$(SRC_DIR)/Renders \
-               -I$(SRC_DIR)/SceneLoaders \
-               -I$(SRC_DIR)/Builders \
-               -I$(SRC_DIR)/Factories
+			   -I$(SRC_DIR)/Math \
+			   -I$(SRC_DIR)/RayTracer \
+			   -I$(SRC_DIR)/Primitives \
+			   -I$(SRC_DIR)/Materials \
+			   -I$(SRC_DIR)/Lights \
+			   -I$(SRC_DIR)/Renders \
+			   -I$(SRC_DIR)/SceneLoaders \
+			   -I$(SRC_DIR)/Builders \
+			   -I$(SRC_DIR)/Factories
 
+CXXFLAGS = -std=c++17 -Wall -Wextra -O2 $(INCLUDE_DIRS) -I/usr/local/include -I/opt/homebrew/include
 
+# Linker flags (simple and robust)
+LDFLAGS =
+ifeq ($(UNAME_S),Linux)
+	LDFLAGS += -lraylib -lGL -lm -lpthread -ldl -lrt -lX11 -lconfig++
+else ifeq ($(UNAME_S),Darwin)
+	# Add generic Homebrew locations first
+	LDFLAGS += -L/usr/local/lib -L/opt/homebrew/lib \
+			   -lraylib -lconfig++ \
+			   -framework OpenGL -framework Cocoa -framework IOKit -framework CoreVideo \
+			   -framework CoreFoundation -framework CoreGraphics -framework Foundation -framework AppKit \
+			   -lobjc
+endif
+
+# Sources/objects
 SRCS := $(shell find $(SRC_DIR) -name "*.cpp")
+# Exclude legacy SFML renderer if still present in tree
+SRCS := $(filter-out $(SRC_DIR)/Renders/SFMLRenderer.cpp,$(SRCS))
 OBJS = $(patsubst $(SRC_DIR)/%.cpp,$(OBJ_DIR)/%.o,$(SRCS))
 OBJ_DIRS := $(sort $(dir $(OBJS)))
 
+# Rules
+
+# Colors
 GREEN = \033[0;32m
 RED = \033[0;31m
 YELLOW = \033[0;33m
+CYAN = \033[0;36m
+MAGENTA = \033[0;35m
 RESET = \033[0m
 
-.PHONY: all clean fclean re run dirs sources
+.PHONY: all banner clean fclean re dirs
 
-all: dirs $(NAME)
+all: banner dirs $(NAME)
+
+banner:
+	@printf "$(CYAN)=================================================================================$(RESET)\n"
+	@printf "\n"
+	@printf "$(MAGENTA)  ██████   █████  ██    ██     ████████ ██████   █████   ██████ ███████ ██████$(RESET)\n"
+	@printf "$(MAGENTA)  ██   ██ ██   ██  ██  ██         ██    ██   ██ ██   ██ ██      ██      ██   ██$(RESET)\n"
+	@printf "$(MAGENTA)  ██████  ███████   ████          ██    ██████  ███████ ██      █████   ██████$(RESET)\n"
+	@printf "$(MAGENTA)  ██   ██ ██   ██    ██           ██    ██   ██ ██   ██ ██      ██      ██   ██$(RESET)\n"
+	@printf "$(MAGENTA)  ██   ██ ██   ██    ██           ██    ██   ██ ██   ██  ██████ ███████ ██   ██$(RESET)\n"
+	@printf "\n"
+	@printf "$(CYAN)                          RayTracer build (Raylib edition)     $(RESET)\n"
+	@printf "\n"
+	@printf "$(CYAN)=================================================================================$(RESET)\n"
 
 dirs:
-	@for dir in $(OBJ_DIRS); do \
-		mkdir -p $$dir; \
-	done
+	@for dir in $(OBJ_DIRS); do mkdir -p $$dir; done
 
 $(NAME): $(OBJS)
-	@echo "$(GREEN)Linking $(NAME)...$(RESET)"
-	@$(CXX) $(CXXFLAGS) -o $@ $^ $(SFML_LIBS) -lconfig++
-	@echo "$(GREEN) $(NAME) successfully compiled! $(RESET)"
+	@printf "$(GREEN)Linking$(RESET) %s\n" "$(NAME)"
+	@$(CXX) $(OBJS) -o $(NAME) $(LDFLAGS)
+	@printf "$(GREEN)Build success:$(RESET) %s\n" "$(NAME)"
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
-	@echo "$(YELLOW)Compiling $<...$(RESET)"
 	@mkdir -p $(dir $@)
-	@$(CXX) $(CXXFLAGS) $(INCLUDE_DIRS) -c $< -o $@
+	@printf "$(YELLOW)Compiling$(RESET) %s\n" "$<"
+	@$(CXX) $(CXXFLAGS) -c $< -o $@
 
 clean:
-	@echo "$(RED)Cleaning object files...$(RESET)"
+	@printf "$(RED)Cleaning object files...$(RESET)\n"
 	@rm -rf $(OBJ_DIR)
-	@echo "$(RED)Cleaned!$(RESET)"
 
 fclean: clean
-	@echo "$(RED)Cleaning executable...$(RESET)"
-	@rm -f $(NAME)
-	@rm -f output.ppm output.png
-	@echo "$(RED)Fully cleaned!$(RESET)"
+	@printf "$(RED)Cleaning binary and outputs...$(RESET)\n"
+	@rm -f $(NAME) output.ppm output.png
 
 re: fclean all
-
-sources:
-	@echo "$(YELLOW)Sources détectées:$(RESET)"
-	@for src in $(SRCS); do \
-		echo "$$src"; \
-	done

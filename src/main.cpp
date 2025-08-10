@@ -11,7 +11,7 @@
 #include "FlatMaterial.hpp"
 #include "DirectionalLight.hpp"
 #include "PPMRenderer.hpp"
-#include "SFMLRenderer.hpp"
+#include "RaylibRenderer.hpp"
 #include "ConfigSceneLoader.hpp"
 #include <iostream>
 #include <memory>
@@ -26,16 +26,16 @@ void printUsage(const char* programName)
     std::cout << "Usage: " << programName << " [options] [scene_file]" << std::endl;
     std::cout << "Options:" << std::endl;
     std::cout << "  --ppm <output.ppm>     Render to PPM file" << std::endl;
-    std::cout << "  --sfml <output.png>    Render with SFML (real-time display + PNG output)" << std::endl;
-    std::cout << "  --threads <num>        Number of rendering threads (SFML only, default: auto)" << std::endl;
+    std::cout << "  --raylib <output.png>  Render with raylib (real-time display + PNG output)" << std::endl;
+    std::cout << "  --threads <num>        Number of rendering threads (real-time renderer, default: auto)" << std::endl;
     std::cout << "  --help                 Display this help message" << std::endl;
     std::cout << "If scene_file is provided, loads the scene from that file" << std::endl;
 }
 
-void parseCommandLine(int argc, char* argv[], bool& useSFML, std::string& outputFile,
+void parseCommandLine(int argc, char* argv[], bool& useRealtime, std::string& outputFile,
                      int& numThreads, std::string& sceneFile, bool& useSceneFile)
 {
-    useSFML = false;
+    useRealtime = false;
     outputFile = "output.ppm";
     numThreads = 0;
     sceneFile = "default_scene.cfg";
@@ -43,11 +43,11 @@ void parseCommandLine(int argc, char* argv[], bool& useSFML, std::string& output
 
     for (int i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--ppm") == 0 && i + 1 < argc) {
-            useSFML = false;
+            useRealtime = false;
             outputFile = argv[++i];
         }
-        else if (strcmp(argv[i], "--sfml") == 0 && i + 1 < argc) {
-            useSFML = true;
+        else if (strcmp(argv[i], "--raylib") == 0 && i + 1 < argc) {
+            useRealtime = true;
             outputFile = argv[++i];
         }
         else if (strcmp(argv[i], "--threads") == 0 && i + 1 < argc) {
@@ -83,13 +83,13 @@ std::unique_ptr<Scene> loadSceneFromFile(const std::string& sceneFile)
     }
 }
 
-bool renderScene(Scene& scene, bool useSFML, const std::string& outputFile, int numThreads)
+bool renderScene(Scene& scene, bool useRealtime, const std::string& outputFile, int numThreads)
 {
-    if (useSFML) {
-        std::cout << "Rendering with SFML renderer..." << std::endl;
-        SFMLRenderer renderer(numThreads);
+    if (useRealtime) {
+        std::cout << "Rendering with raylib renderer..." << std::endl;
+        RaylibRenderer renderer(numThreads);
         if (!renderer.render(scene, outputFile)) {
-            std::cerr << "Failed to render the scene with SFML" << std::endl;
+            std::cerr << "Failed to render the scene with raylib" << std::endl;
             return false;
         }
     } else {
@@ -107,14 +107,14 @@ bool renderScene(Scene& scene, bool useSFML, const std::string& outputFile, int 
 
 int main(int argc, char* argv[])
 {
-    bool useSFML;
+    bool useRealtime;
     std::string outputFile;
     int numThreads;
     std::string sceneFile;
     bool useSceneFile;
 
     try {
-        parseCommandLine(argc, argv, useSFML, outputFile, numThreads, sceneFile, useSceneFile);
+    parseCommandLine(argc, argv, useRealtime, outputFile, numThreads, sceneFile, useSceneFile);
     } catch (const std::exception& e) {
         std::cerr << "Error parsing command line arguments: " << e.what() << std::endl;
         return 1;
@@ -136,7 +136,7 @@ int main(int argc, char* argv[])
 
     // Render scene
     try {
-        if (!renderScene(*scene, useSFML, outputFile, numThreads)) {
+    if (!renderScene(*scene, useRealtime, outputFile, numThreads)) {
             return 1;
         }
     } catch (const std::exception& e) {
