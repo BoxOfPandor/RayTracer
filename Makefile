@@ -21,7 +21,8 @@ INCLUDE_DIRS = -I$(SRC_DIR) \
 			   -I$(SRC_DIR)/Renders \
 			   -I$(SRC_DIR)/SceneLoaders \
 			   -I$(SRC_DIR)/Builders \
-			   -I$(SRC_DIR)/Factories
+			   -I$(SRC_DIR)/Factories \
+			   -I$(SRC_DIR)/Editor
 
 CXXFLAGS = -std=c++17 -Wall -Wextra -O2 $(INCLUDE_DIRS) -I/usr/local/include -I/opt/homebrew/include
 

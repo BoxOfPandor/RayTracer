@@ -12,6 +12,7 @@
 #include "DirectionalLight.hpp"
 #include "PPMRenderer.hpp"
 #include "RaylibRenderer.hpp"
+#include "Editor/EditorApp.hpp"
 #include "ConfigSceneLoader.hpp"
 #include <iostream>
 #include <memory>
@@ -27,19 +28,21 @@ void printUsage(const char* programName)
     std::cout << "Options:" << std::endl;
     std::cout << "  --ppm <output.ppm>     Render to PPM file" << std::endl;
     std::cout << "  --raylib <output.png>  Render with raylib (real-time display + PNG output)" << std::endl;
+    std::cout << "  --editor               Open editor UI (no raytracing render)" << std::endl;
     std::cout << "  --threads <num>        Number of rendering threads (real-time renderer, default: auto)" << std::endl;
     std::cout << "  --help                 Display this help message" << std::endl;
     std::cout << "If scene_file is provided, loads the scene from that file" << std::endl;
 }
 
 void parseCommandLine(int argc, char* argv[], bool& useRealtime, std::string& outputFile,
-                     int& numThreads, std::string& sceneFile, bool& useSceneFile)
+                     int& numThreads, std::string& sceneFile, bool& useSceneFile, bool& openEditor)
 {
     useRealtime = false;
     outputFile = "output.ppm";
     numThreads = 0;
     sceneFile = "default_scene.cfg";
     useSceneFile = false;
+    openEditor = false;
 
     for (int i = 1; i < argc; ++i) {
         if (strcmp(argv[i], "--ppm") == 0 && i + 1 < argc) {
@@ -52,6 +55,9 @@ void parseCommandLine(int argc, char* argv[], bool& useRealtime, std::string& ou
         }
         else if (strcmp(argv[i], "--threads") == 0 && i + 1 < argc) {
             numThreads = std::stoi(argv[++i]);
+        }
+        else if (strcmp(argv[i], "--editor") == 0) {
+            openEditor = true;
         }
         else if (strcmp(argv[i], "--help") == 0) {
             printUsage(argv[0]);
@@ -112,9 +118,10 @@ int main(int argc, char* argv[])
     int numThreads;
     std::string sceneFile;
     bool useSceneFile;
+    bool openEditor;
 
     try {
-    parseCommandLine(argc, argv, useRealtime, outputFile, numThreads, sceneFile, useSceneFile);
+    parseCommandLine(argc, argv, useRealtime, outputFile, numThreads, sceneFile, useSceneFile, openEditor);
     } catch (const std::exception& e) {
         std::cerr << "Error parsing command line arguments: " << e.what() << std::endl;
         return 1;
@@ -134,9 +141,15 @@ int main(int argc, char* argv[])
         return 1;
     }
 
+    if (openEditor) {
+        RayTracer::EditorApp app;
+        app.run(std::move(scene));
+        return 0;
+    }
+
     // Render scene
     try {
-    if (!renderScene(*scene, useRealtime, outputFile, numThreads)) {
+        if (!renderScene(*scene, useRealtime, outputFile, numThreads)) {
             return 1;
         }
     } catch (const std::exception& e) {
