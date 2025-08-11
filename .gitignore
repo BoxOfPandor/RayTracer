@@ -42,3 +42,4 @@ build
 *.png
 *.cfg
 raytracer
+.DS_Store
