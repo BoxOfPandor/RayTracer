@@ -70,6 +70,11 @@ namespace RayTracer {
          * @return The material of the primitive
          */
         virtual const IMaterial& getMaterial() const = 0;
+
+    /**
+     * @brief Get a human-readable type name for UI/debug (e.g., "sphere", "plane", "cylinder")
+     */
+    virtual const char* getTypeName() const = 0;
     };
 } // namespace RayTracer
 

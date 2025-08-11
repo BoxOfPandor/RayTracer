@@ -31,6 +31,8 @@ namespace RayTracer {
         void rotateZ(double angle) override;
         const IMaterial& getMaterial() const override;
 
+    const char* getTypeName() const override { return "sphere"; }
+
     private:
         Math::Point3D _origin;
         double _radius;

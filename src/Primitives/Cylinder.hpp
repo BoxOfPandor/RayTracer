@@ -103,6 +103,8 @@ namespace RayTracer {
          */
         const IMaterial& getMaterial() const override;
 
+    const char* getTypeName() const override { return "cylinder"; }
+
     private:
         Math::Point3D _origin;
         Math::Vector3D _direction;

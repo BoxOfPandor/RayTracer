@@ -29,6 +29,8 @@ namespace RayTracer {
         void rotateZ(double angle) override;
         const IMaterial& getMaterial() const override;
 
+    const char* getTypeName() const override { return "plane"; }
+
     private:
         Math::Point3D _point;
         Math::Vector3D _normal;
