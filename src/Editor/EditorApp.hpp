@@ -44,6 +44,14 @@ namespace RayTracer {
     Font _font{};
     float _fontSpacing = 1.0f;
 
+    // Top-bar menu state
+    bool _menuOpenFile = false;
+    bool _menuOpenRender = false;
+    bool _menuOpenMode = false;
+    int _renderChoice = 0; // 0 = Raylib Preview, 1 = PPM Output
+    int _modeChoice = 0;   // 0 = Orbit, 1 = Inspect (stub)
+    bool _requestExit = false;
+
         void drawTopBar();
         void drawHierarchy(const Scene& scene);
         void drawProperties(const Scene& scene);

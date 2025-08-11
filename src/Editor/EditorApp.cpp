@@ -88,9 +88,9 @@ bool EditorApp::run(std::unique_ptr<Scene> scene)
         BeginDrawing();
         ClearBackground((Color){25, 25, 28, 255});
 
-    // Top bar
+    // Top bar (interactive)
     DrawRectangleRec(topBar, (Color){45, 45, 50, 255});
-    drawText("File: [Load] [Export]  |  Render: [Raylib] [PPM]  |  Mode: Editor (Orbit)", 10, 10, 18, RAYWHITE);
+    drawTopBar();
 
         // Left hierarchy panel
     DrawRectangleRec(leftPanel, (Color){35, 35, 40, 255});
@@ -150,12 +150,124 @@ bool EditorApp::run(std::unique_ptr<Scene> scene)
         }
 
         EndDrawing();
+
+        if (_requestExit) {
+            running = false;
+        }
     }
     CloseWindow();
     return true;
 }
 
-void EditorApp::drawTopBar() {}
+static bool isClicked(Rectangle r)
+{
+    return CheckCollisionPointRec(GetMousePosition(), r) && IsMouseButtonPressed(MOUSE_BUTTON_LEFT);
+}
+
+static bool isHover(Rectangle r)
+{
+    return CheckCollisionPointRec(GetMousePosition(), r);
+}
+
+void EditorApp::drawTopBar()
+{
+    int winW = GetScreenWidth();
+    (void)winW;
+    int x = 10;
+    int y = 8;
+    float itemHeight = _topBarHeight - 16;
+
+    auto drawMenuButton = [&](const char* label, Rectangle& rect, bool open){
+        Vector2 size = MeasureTextEx(_font, label, 18, _fontSpacing);
+        rect = { (float)x, (float)y, size.x + 16, itemHeight };
+        Color bg = open ? (Color){70,70,78,255} : (isHover(rect) ? (Color){60,60,66,255} : (Color){45,45,50,0});
+        if (bg.a) DrawRectangleRounded(rect, 0.2f, 4, bg);
+        drawText(label, (int)(x+8), (int)(y + (itemHeight - 18)/2), 18, RAYWHITE);
+        x += (int)rect.width + 8;
+    };
+
+    Rectangle fileBtn{}; Rectangle renderBtn{}; Rectangle modeBtn{};
+    drawMenuButton("File", fileBtn, _menuOpenFile);
+    drawMenuButton("Render", renderBtn, _menuOpenRender);
+    drawMenuButton("Mode", modeBtn, _menuOpenMode);
+
+    // Handle button clicks (toggle)
+    if (isClicked(fileBtn))   { _menuOpenFile = !_menuOpenFile; _menuOpenRender = _menuOpenMode = false; }
+    if (isClicked(renderBtn)) { _menuOpenRender = !_menuOpenRender; _menuOpenFile = _menuOpenMode = false; }
+    if (isClicked(modeBtn))   { _menuOpenMode = !_menuOpenMode; _menuOpenFile = _menuOpenRender = false; }
+
+    // Close menus if click outside
+    if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+        bool insideAny = CheckCollisionPointRec(GetMousePosition(), fileBtn) ||
+                         CheckCollisionPointRec(GetMousePosition(), renderBtn) ||
+                         CheckCollisionPointRec(GetMousePosition(), modeBtn);
+        // If menus are open, also consider their popup rects below as inside (built when drawing)
+        // We'll approximate by a band under the top bar
+        Rectangle underBar = {0, (float)_topBarHeight, (float)GetScreenWidth(), 200.0f};
+        if (!insideAny && !CheckCollisionPointRec(GetMousePosition(), underBar)) {
+            _menuOpenFile = _menuOpenRender = _menuOpenMode = false;
+        }
+    }
+
+    auto drawMenuList = [&](float xLeft, const char* const* items, int count, int* choice, bool* open){
+        float w = 0;
+        for (int i=0;i<count;i++) {
+            Vector2 s = MeasureTextEx(_font, items[i], 18, _fontSpacing);
+            if (s.x > w) w = s.x;
+        }
+        w += 24;
+        float itemH = 26;
+        Rectangle panel = { xLeft, (float)_topBarHeight, w, itemH * count + 8 };
+        DrawRectangleRec(panel, (Color){40,40,46,255});
+        DrawRectangleLinesEx(panel, 1, (Color){80,80,90,255});
+
+        for (int i=0;i<count;i++) {
+            Rectangle r = { panel.x + 4, panel.y + 4 + i*itemH, panel.width - 8, itemH - 2 };
+            bool hover = isHover(r);
+            if (hover) DrawRectangleRec(r, (Color){70,70,78,255});
+            Color txt = (*choice == i) ? (Color){180,220,255,255} : RAYWHITE;
+            drawText(items[i], (int)(r.x + 6), (int)(r.y + 4), 18, txt);
+            if (isClicked(r)) { if (choice) *choice = i; if (open) *open = false; }
+        }
+    };
+
+    // FILE menu
+    if (_menuOpenFile) {
+        const char* items[] = { "Load scene...", "Export PPM...", "Exit" };
+        // Draw and handle clicks
+        float xLeft = fileBtn.x;
+        // Background shadow
+        drawMenuList(xLeft, items, 3, nullptr, &_menuOpenFile);
+        // Handle actions separately (check clicks again on items rects would require duplication)
+        // Instead, check on release: we can detect by polling after draw if mouse was in line and pressed
+        // Quick approach: immediate actions on press handled in loop above via drawMenuList; emulate by checking position now
+        Rectangle menuRect = { xLeft, (float)_topBarHeight, 220, 26*3 + 8 };
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT) && CheckCollisionPointRec(GetMousePosition(), menuRect)) {
+            int relY = (int)(GetMousePosition().y - menuRect.y - 4);
+            int idx = relY / 26;
+            if (idx == 0) {
+                // Stub: load scene
+                std::cout << "[Editor] Load scene clicked" << std::endl;
+            } else if (idx == 1) {
+                std::cout << "[Editor] Export PPM clicked" << std::endl;
+            } else if (idx == 2) {
+                _requestExit = true;
+            }
+        }
+    }
+
+    // RENDER menu
+    if (_menuOpenRender) {
+        const char* items[] = { "Raylib Preview", "PPM Output" };
+        drawMenuList(renderBtn.x, items, 2, &_renderChoice, &_menuOpenRender);
+    }
+
+    // MODE menu
+    if (_menuOpenMode) {
+        const char* items[] = { "Editor (Orbit)", "Inspect (stub)" };
+        drawMenuList(modeBtn.x, items, 2, &_modeChoice, &_menuOpenMode);
+    }
+}
 
 void EditorApp::drawHierarchy(const Scene& scene)
 {
