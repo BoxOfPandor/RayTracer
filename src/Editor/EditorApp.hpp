@@ -9,6 +9,10 @@
 #include <memory>
 #include <string>
 
+extern "C" {
+#include <raylib.h>
+}
+
 namespace RayTracer {
     class Scene;
 
@@ -36,10 +40,17 @@ namespace RayTracer {
         // Selection index in hierarchy (flat for now)
         int _selectedIndex = -1;
 
+    // UI font
+    Font _font{};
+    float _fontSpacing = 1.0f;
+
         void drawTopBar();
         void drawHierarchy(const Scene& scene);
         void drawProperties(const Scene& scene);
         void drawViewport(const Scene& scene);
+
+    // Text helper
+    void drawText(const char* text, int x, int y, float size, Color color);
     };
 }
 

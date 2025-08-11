@@ -13,6 +13,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <iostream>
 
 extern "C" {
 #include <raylib.h>
@@ -43,6 +44,16 @@ bool EditorApp::run(std::unique_ptr<Scene> scene)
     // Ensure window is positioned at top-left; on macOS this will maximize nicely
     SetWindowPosition(0, 0);
     SetTargetFPS(60);
+
+    // Try loading a professional UI font if present (optional assets/fonts/Inter.ttf)
+    // Fallback to default if not found
+    if (FileExists("assets/fonts/Inter.ttf")) {
+        std::cout << "Loaded custom font: assets/fonts/Inter.ttf" << std::endl;
+        _font = LoadFontEx("assets/fonts/Inter.ttf", 20, nullptr, 0);
+    } else {
+        std::cout << "Loaded default font" << std::endl;
+        _font = GetFontDefault();
+    }
 
     bool running = true;
     while (running && !WindowShouldClose()) {
@@ -77,16 +88,16 @@ bool EditorApp::run(std::unique_ptr<Scene> scene)
         BeginDrawing();
         ClearBackground((Color){25, 25, 28, 255});
 
-        // Top bar
-        DrawRectangleRec(topBar, (Color){45, 45, 50, 255});
-        DrawText("File: [Load] [Export]  |  Render: [Raylib] [PPM]  |  Mode: Editor (Orbit)", 10, 10, 18, RAYWHITE);
+    // Top bar
+    DrawRectangleRec(topBar, (Color){45, 45, 50, 255});
+    drawText("File: [Load] [Export]  |  Render: [Raylib] [PPM]  |  Mode: Editor (Orbit)", 10, 10, 18, RAYWHITE);
 
         // Left hierarchy panel
-        DrawRectangleRec(leftPanel, (Color){35, 35, 40, 255});
+    DrawRectangleRec(leftPanel, (Color){35, 35, 40, 255});
         drawHierarchy(*scene);
 
         // Right properties panel
-        DrawRectangleRec(rightPanel, (Color){35, 35, 40, 255});
+    DrawRectangleRec(rightPanel, (Color){35, 35, 40, 255});
         drawProperties(*scene);
 
         // Center viewport
@@ -150,27 +161,27 @@ void EditorApp::drawHierarchy(const Scene& scene)
 {
     int x = 12;
     int y = _topBarHeight + 12;
-    DrawText("Hierarchy", x, y, 20, RAYWHITE);
+    drawText("Hierarchy", x, y, 20, RAYWHITE);
     y += 28;
 
-    DrawText("- Camera", x, y, 18, LIGHTGRAY); y += 24;
+    drawText("- Camera", x, y, 18, LIGHTGRAY); y += 24;
 
-    DrawText("- Primitives", x, y, 18, LIGHTGRAY); y += 24;
+    drawText("- Primitives", x, y, 18, LIGHTGRAY); y += 24;
     int i = 0;
     for (const auto& _ : scene.getPrimitives()) {
         (void)_; // unused
         Color c = (_selectedIndex == i) ? RAYWHITE : GRAY;
-        DrawText(TextFormat("  * Primitive %d", i), x, y, 16, c);
+        drawText(TextFormat("  * Primitive %d", i), x, y, 16, c);
         y += 20;
         i++;
     }
 
-    DrawText("- Lights", x, y, 18, LIGHTGRAY); y += 24;
+    drawText("- Lights", x, y, 18, LIGHTGRAY); y += 24;
     i = 0;
     for (const auto& _ : scene.getLights()) {
         (void)_; // unused
         Color c = (_selectedIndex == i) ? RAYWHITE : GRAY;
-        DrawText(TextFormat("  * Light %d", i), x, y, 16, c);
+        drawText(TextFormat("  * Light %d", i), x, y, 16, c);
         y += 20;
         i++;
     }
@@ -180,12 +191,21 @@ void EditorApp::drawProperties(const Scene& scene)
 {
     int x = GetScreenWidth() - _rightPanelWidth + 12;
     int y = _topBarHeight + 12;
-    DrawText("Properties", x, y, 20, RAYWHITE);
+    drawText("Properties", x, y, 20, RAYWHITE);
     y += 28;
 
-    DrawText(TextFormat("Orbit: dist=%.2f yaw=%.2f pitch=%.2f", _viewCam.distance, _viewCam.yaw, _viewCam.pitch), x, y, 16, GRAY);
+    drawText(TextFormat("Orbit: dist=%.2f yaw=%.2f pitch=%.2f", _viewCam.distance, _viewCam.yaw, _viewCam.pitch), x, y, 16, GRAY);
     y += 22;
-    DrawText("(Editable fields coming soon)", x, y, 16, DARKGRAY);
+    drawText("(Editable fields coming soon)", x, y, 16, DARKGRAY);
 }
 
 void EditorApp::drawViewport(const Scene& scene) { (void)scene; }
+
+void EditorApp::drawText(const char* text, int x, int y, float size, Color color)
+{
+    if (_font.baseSize > 0) {
+        DrawTextEx(_font, text, (Vector2){(float)x, (float)y}, size, _fontSpacing, color);
+    } else {
+        DrawText(text, x, y, (int)size, color);
+    }
+}
