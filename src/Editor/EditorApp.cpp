@@ -168,10 +168,10 @@ void EditorApp::drawHierarchy(const Scene& scene)
 
     drawText("- Primitives", x, y, 18, LIGHTGRAY); y += 24;
     int i = 0;
-    for (const auto& _ : scene.getPrimitives()) {
-        (void)_; // unused
+    for (const auto& prim : scene.getPrimitives()) {
         Color c = (_selectedIndex == i) ? RAYWHITE : GRAY;
-        drawText(TextFormat("  * Primitive %d", i), x, y, 16, c);
+        const char* typeName = prim ? prim->getTypeName() : "primitive";
+        drawText(TextFormat("  * %s %d", typeName, i), x, y, 16, c);
         y += 20;
         i++;
     }
