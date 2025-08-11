@@ -33,15 +33,16 @@ bool EditorApp::run(std::unique_ptr<Scene> scene)
 {
     if (!scene) return false;
 
-    const int initialW = 1200;
-    const int initialH = 800;
+    // Open the editor window to fill the current monitor
+    int monitor = GetCurrentMonitor();
+    int initialW = GetMonitorWidth(monitor);
+    int initialH = GetMonitorHeight(monitor);
 
-    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT);
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE | FLAG_MSAA_4X_HINT | FLAG_WINDOW_MAXIMIZED);
     InitWindow(initialW, initialH, "RayTracer Editor");
+    // Ensure window is positioned at top-left; on macOS this will maximize nicely
+    SetWindowPosition(0, 0);
     SetTargetFPS(60);
-
-    // Simple grid texture for viewport background
-    RenderTexture2D viewportRT = LoadRenderTexture(800, 600);
 
     bool running = true;
     while (running && !WindowShouldClose()) {
@@ -139,8 +140,6 @@ bool EditorApp::run(std::unique_ptr<Scene> scene)
 
         EndDrawing();
     }
-
-    UnloadRenderTexture(viewportRT);
     CloseWindow();
     return true;
 }
